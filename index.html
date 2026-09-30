@@ -1,0 +1,2738 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>elTAHFIDH TAEKWONDO INTEGRATED SYSTEM</title>
+    
+    <!-- PWA & Mobile Optimization Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="elTAHFIDH">
+    <meta name="theme-color" content="#0F172A">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- html2pdf CDN for printable receipts & athlete reports -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Chart.js for Athlete Radar Chart & Performance Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        dojang: {
+                            red: '#E11D48',
+                            blue: '#2563EB',
+                            dark: '#0F172A',
+                            navy: '#1E293B',
+                            gold: '#F59E0B'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            #printableReceiptArea, #printableReceiptArea *, #printableAthleteCardArea, #printableAthleteCardArea * { visibility: visible; }
+            #printableReceiptArea, #printableAthleteCardArea { position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col md:flex-row pb-16 md:pb-0">
+
+    <!-- Mobile Header -->
+    <header class="md:hidden bg-slate-900 text-white p-4 flex justify-between items-center sticky top-0 z-30 shadow-md">
+        <div class="flex items-center gap-3">
+            <div id="appLogoMobile" class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-rose-600 to-amber-500 p-0.5 shadow-md flex items-center justify-center overflow-hidden">
+                <!-- SVG / Image Logo inserted via JS -->
+            </div>
+            <div>
+                <span class="font-black text-xs tracking-wide uppercase block text-white">elTAHFIDH TAEKWONDO</span>
+                <span class="text-[9px] text-emerald-400 font-mono flex items-center gap-1">
+                    <i class="fa-solid fa-circle text-[6px]"></i> Dojang System
+                </span>
+            </div>
+        </div>
+        <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="text-slate-300 hover:text-white p-2.5 rounded-lg bg-slate-800 border border-slate-700">
+            <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="bg-slate-900 text-slate-300 w-full md:w-64 flex-shrink-0 md:min-h-screen hidden md:block fixed md:relative z-40 top-0 left-0 bottom-0 overflow-y-auto border-r border-slate-800">
+        <div class="p-5 flex items-center justify-between border-b border-slate-800">
+            <div class="flex items-center gap-3">
+                <div id="appLogoSidebar" class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-700 via-rose-600 to-amber-500 p-0.5 shadow-lg flex items-center justify-center overflow-hidden">
+                    <!-- SVG / Image Logo inserted via JS -->
+                </div>
+                <div>
+                    <h1 class="font-black text-white tracking-tight text-base leading-tight">elTAHFIDH</h1>
+                    <p class="text-[10px] text-amber-400 font-bold tracking-wider uppercase">TAEKWONDO SYSTEM</p>
+                </div>
+            </div>
+            <button class="md:hidden text-slate-400 hover:text-white" onclick="toggleMobileMenu()">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <div class="px-4 py-3 mx-3 my-4 bg-slate-800/80 rounded-xl border border-slate-700/60 shadow-inner">
+            <div class="flex items-center justify-between">
+                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Google Sheets Sync</p>
+                <button onclick="openLogoModal()" class="text-[10px] text-blue-400 hover:text-blue-300 underline font-semibold">
+                    <i class="fa-solid fa-image mr-1"></i>Logo
+                </button>
+            </div>
+            <div class="mt-1 text-[10px] text-slate-400 font-mono flex items-center gap-1 truncate">
+                <i class="fa-solid fa-shield-halved text-emerald-400"></i> Server Sync: Active
+            </div>
+            <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-700/50">
+                <span class="text-xs text-slate-200 font-medium">Status Sheets:</span>
+                <span id="sheetStatusBadge" onclick="openSheetsModal()" class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded cursor-pointer border border-slate-600 hover:border-emerald-500 transition font-mono" title="Atur Integrasi Google Sheets">
+                    <i class="fa-solid fa-file-excel mr-1 text-emerald-400"></i>Terhubung
+                </span>
+            </div>
+        </div>
+
+        <nav class="px-3 space-y-1">
+            <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-white bg-blue-600 shadow-md">
+                <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                Dashboard
+            </a>
+            <a href="#" onclick="switchTab('members')" id="nav-members" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
+                <i class="fa-solid fa-users w-5 text-center"></i>
+                Data Anggota
+            </a>
+            <a href="#" onclick="switchTab('attendance')" id="nav-attendance" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
+                <i class="fa-solid fa-clipboard-user w-5 text-center"></i>
+                Presensi Latihan
+            </a>
+            <a href="#" onclick="switchTab('payments')" id="nav-payments" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
+                <i class="fa-solid fa-wallet w-5 text-center"></i>
+                Iuran & Histori
+            </a>
+            <a href="#" onclick="switchTab('billing')" id="nav-billing" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
+                <i class="fa-solid fa-paper-plane w-5 text-center"></i>
+                Penagihan WA
+            </a>
+            <a href="#" onclick="switchTab('athletes')" id="nav-athletes" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800 hover:text-white">
+                <i class="fa-solid fa-trophy w-5 text-center text-amber-400"></i>
+                Evaluasi Atlit
+            </a>
+        </nav>
+
+        <div class="p-4 mt-auto border-t border-slate-800/80 my-4 space-y-2">
+            <button onclick="directSendToSpreadsheet()" class="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow hover:shadow-emerald-900/30">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Kirim Data
+            </button>
+            <button onclick="promptResetSampleData()" class="w-full py-2 px-3 bg-slate-800 hover:bg-rose-950/50 text-slate-400 hover:text-rose-300 rounded-lg text-[11px] font-medium border border-slate-700 transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-rotate"></i> Reset Data Contoh
+            </button>
+        </div>
+    </aside>
+
+    <!-- Mobile Navigation Bottom Bar -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 flex justify-around items-center z-30 px-1 py-2 text-xs shadow-lg">
+        <button onclick="switchTab('dashboard')" id="mnav-dashboard" class="mobile-nav-item flex flex-col items-center py-1 px-2 text-blue-500 font-medium">
+            <i class="fa-solid fa-chart-pie text-base mb-0.5"></i>
+            <span>Beranda</span>
+        </button>
+        <button onclick="switchTab('members')" id="mnav-members" class="mobile-nav-item flex flex-col items-center py-1 px-2 text-slate-400">
+            <i class="fa-solid fa-users text-base mb-0.5"></i>
+            <span>Anggota</span>
+        </button>
+        <button onclick="switchTab('attendance')" id="mnav-attendance" class="mobile-nav-item flex flex-col items-center py-1 px-2 text-slate-400">
+            <i class="fa-solid fa-clipboard-user text-base mb-0.5"></i>
+            <span>Presensi</span>
+        </button>
+        <button onclick="switchTab('payments')" id="mnav-payments" class="mobile-nav-item flex flex-col items-center py-1 px-2 text-slate-400">
+            <i class="fa-solid fa-wallet text-base mb-0.5"></i>
+            <span>Iuran</span>
+        </button>
+        <button onclick="switchTab('athletes')" id="mnav-athletes" class="mobile-nav-item flex flex-col items-center py-1 px-2 text-amber-400 font-medium">
+            <i class="fa-solid fa-trophy text-base mb-0.5"></i>
+            <span>Atlit</span>
+        </button>
+    </nav>
+
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+        <!-- Toast Notification -->
+        <div id="toastNotification" class="fixed top-5 right-5 z-50 transform translate-x-full transition-transform duration-300 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700 hidden">
+            <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+            <span id="toastMessage" class="text-xs font-medium">Notifikasi</span>
+        </div>
+
+        <!-- TAB DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">Dashboard Dojang</h2>
+                    <p class="text-sm text-slate-500">Ringkasan status performa, anggota, keuangan, dan evaluasi atlit</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="directSendToSpreadsheet()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md hover:shadow-lg">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Kirim Data
+                    </button>
+                    <button onclick="openSheetsModal()" class="bg-slate-800 hover:bg-slate-900 text-slate-200 px-3 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-1" title="Pengaturan Webhook Spreadsheet">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Overview Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow transition">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Anggota</p>
+                            <h3 class="text-2xl font-black text-slate-800 mt-1" id="dash-total-members">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-users text-lg"></i>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-emerald-600 font-semibold mt-3 flex items-center gap-1">
+                        <i class="fa-solid fa-circle-check"></i> <span id="dash-active-members">0</span> Anggota Aktif
+                    </p>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow transition">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Iuran Bulan Ini</p>
+                            <h3 class="text-2xl font-black text-slate-800 mt-1" id="dash-total-collected">Rp 0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-wallet text-lg"></i>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 font-semibold mt-3 flex items-center gap-1">
+                        <span id="dash-paid-ratio">0/0</span> Murid Sudah Bayar
+                    </p>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow transition">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tunggakan Iuran</p>
+                            <h3 class="text-2xl font-black text-rose-600 mt-1" id="dash-unpaid-amount">Rp 0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-hand-holding-dollar text-lg"></i>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-rose-500 font-semibold mt-3 flex items-center gap-1">
+                        <span id="dash-unpaid-count">0</span> Murid Belum Lunas
+                    </p>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow transition">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Atlit Bina Prestasi</p>
+                            <h3 class="text-2xl font-black text-amber-600 mt-1" id="dash-athlete-count">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-trophy text-lg"></i>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 font-semibold mt-3 flex items-center gap-1">
+                        <i class="fa-solid fa-chart-line text-emerald-500"></i> Evaluasi Rutin Terintegrasi
+                    </p>
+                </div>
+            </div>
+
+            <!-- Quick Action Grid & Google Sheets Banner -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white p-6 rounded-2xl shadow-md space-y-4 md:col-span-2 border border-slate-800">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-lg">Aksi Cepat Manajemen Dojang</h3>
+                        <span class="text-xs bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 px-3 py-1 rounded-full font-sans flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-halved text-xs"></i> Google Sync Ready
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-300/90 leading-relaxed">Kelola operasional dojang dengan mudah: presensi harian, cetak/unduh Struk Iuran PDF, tagihan & kirim bukti bayar WhatsApp otomatis, hingga Evaluasi Fisik, Teknik & Predikat Atlit Prestasi. Seluruh laporan otomatis tersambung ke Google Spreadsheet.</p>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
+                        <button onclick="switchTab('attendance')" class="p-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition flex flex-col items-center gap-2 border border-white/10">
+                            <i class="fa-solid fa-calendar-check text-lg text-emerald-400"></i> Presensi
+                        </button>
+                        <button onclick="switchTab('payments')" class="p-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition flex flex-col items-center gap-2 border border-white/10">
+                            <i class="fa-solid fa-receipt text-lg text-amber-400"></i> Catat Iuran
+                        </button>
+                        <button onclick="switchTab('athletes')" class="p-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition flex flex-col items-center gap-2 border border-white/10">
+                            <i class="fa-solid fa-trophy text-lg text-amber-300"></i> Evaluasi Atlit
+                        </button>
+                        <button onclick="openMemberModal()" class="p-3 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition flex flex-col items-center gap-2 border border-white/10">
+                            <i class="fa-solid fa-user-plus text-lg text-blue-300"></i> Tambah Murid
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center justify-between">
+                        <span>Atlit / Anggota Utama</span>
+                        <i class="fa-solid fa-star text-amber-500"></i>
+                    </h3>
+                    <div id="dashboardAthleteList" class="space-y-2 max-h-52 overflow-y-auto">
+                        <!-- Dynamic list -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB MEMBERS -->
+        <section id="tab-members" class="tab-content space-y-6 hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">Data Anggota Dojang</h2>
+                    <p class="text-sm text-slate-500">Direktori seluruh murid, tingkat sabuk geup, dan profil latihan</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openMemberModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-plus"></i> Tambah Murid Baru
+                    </button>
+                </div>
+            </div>
+
+            <!-- Member Search and Filter -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3">
+                <input type="text" id="memberSearch" oninput="renderMembersList()" placeholder="Cari nama atau ID murid..." class="w-full sm:w-80 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500">
+                <select id="memberGeupFilter" onchange="renderMembersList()" class="w-full sm:w-48 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500">
+                    <option value="ALL">Semua Geup / Sabuk</option>
+                    <option value="Geup 10">Geup 10 (Putih)</option>
+                    <option value="Geup 9">Geup 9 (Kuning)</option>
+                    <option value="Geup 8">Geup 8 (Kuning Hijau)</option>
+                    <option value="Geup 7">Geup 7 (Hijau)</option>
+                    <option value="Geup 6">Geup 6 (Hijau Biru)</option>
+                    <option value="Geup 5">Geup 5 (Biru)</option>
+                    <option value="Geup 4">Geup 4 (Biru Merah)</option>
+                    <option value="Geup 3">Geup 3 (Merah)</option>
+                    <option value="Geup 2">Geup 2 (Merah Hitam)</option>
+                    <option value="DAN 1+">Sabuk Hitam (DAN)</option>
+                </select>
+            </div>
+
+            <!-- Member Cards Grid -->
+            <div id="membersGridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Dynamic cards -->
+            </div>
+        </section>
+
+        <!-- TAB ATTENDANCE -->
+        <section id="tab-attendance" class="tab-content space-y-6 hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">Presensi Pertemuan Latihan</h2>
+                    <p class="text-sm text-slate-500">Pencatatan kehadiran murid setiap jadwal latihan Dojang</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <input type="date" id="attendanceDatePicker" onchange="loadAttendanceForDate()" class="px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="markAllAttendance('Hadir')" class="bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-check-double text-emerald-400"></i> Semuanya Hadir
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Topik / Materi Latihan Pertemuan Ini</label>
+                        <input type="text" id="attendanceTopicInput" placeholder="Contoh: Penguatan Kyorugi & Jurus Taegeuk 3..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Aksi Simpan Sesi</label>
+                        <button onclick="saveAttendanceSession()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-blue-500/20 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> Simpan Presensi Pertemuan
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                    <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-emerald-700 font-bold uppercase block">Hadir</span>
+                            <span class="text-xl font-black text-emerald-900" id="att-count-hadir">0</span>
+                        </div>
+                        <i class="fa-solid fa-circle-check text-emerald-500 text-xl"></i>
+                    </div>
+                    <div class="p-3 bg-amber-50 rounded-xl border border-amber-100 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-amber-700 font-bold uppercase block">Izin</span>
+                            <span class="text-xl font-black text-amber-900" id="att-count-izin">0</span>
+                        </div>
+                        <i class="fa-solid fa-envelope-open-text text-amber-500 text-xl"></i>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded-xl border border-blue-100 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-blue-700 font-bold uppercase block">Sakit</span>
+                            <span class="text-xl font-black text-blue-900" id="att-count-sakit">0</span>
+                        </div>
+                        <i class="fa-solid fa-notes-medical text-blue-500 text-xl"></i>
+                    </div>
+                    <div class="p-3 bg-rose-50 rounded-xl border border-rose-100 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-rose-700 font-bold uppercase block">Alfa</span>
+                            <span class="text-xl font-black text-rose-900" id="att-count-alfa">0</span>
+                        </div>
+                        <i class="fa-solid fa-circle-xmark text-rose-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance List Container -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-800 text-base">Daftar Anggota Aktif</h3>
+                    <input type="text" id="attSearchInput" oninput="renderAttendanceList()" placeholder="Cari murid..." class="w-full sm:w-64 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                </div>
+                <div id="attendanceListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <!-- Dynamic Attendance Cards -->
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 space-y-3">
+                <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-blue-600"></i> Sesi Latihan Terakhir
+                </h3>
+                <div id="attendanceHistoryLog" class="space-y-2 max-h-60 overflow-y-auto">
+                    <!-- Dynamic History -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB PAYMENTS -->
+        <section id="tab-payments" class="tab-content space-y-6 hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">Pencatatan & Histori Iuran</h2>
+                    <p class="text-sm text-slate-500">Monitoring status kas bulanan, rekap tahunan, struk lunas PDF & kirim langsung WA</p>
+                </div>
+                <div class="flex items-center gap-2 bg-slate-200 p-1 rounded-xl">
+                    <button onclick="setPaymentViewMode('monthly')" id="btnViewMonthly" class="px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-slate-900 shadow">Per Bulan</button>
+                    <button onclick="setPaymentViewMode('matrix')" id="btnViewMatrix" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900">Matriks Tahunan</button>
+                </div>
+            </div>
+
+            <!-- VIEW MODE 1: MONTHLY SUMMARY & LIST -->
+            <div id="paymentMonthlyView" class="space-y-6">
+                <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 rounded-2xl shadow-md flex flex-wrap justify-between items-center gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Bulan Dipilih:</span>
+                            <input type="month" id="paymentMonthPicker" onchange="renderPaymentsList()" class="bg-slate-800 text-white border border-slate-700 px-2.5 py-1 rounded-lg text-xs font-bold focus:outline-none">
+                        </div>
+                        <p class="text-2xl md:text-3xl font-extrabold text-emerald-400" id="payment-total-amount">Rp 0</p>
+                    </div>
+                    <div class="flex items-center gap-6 text-sm">
+                        <div>
+                            <p class="text-xs text-slate-400">Lunas</p>
+                            <p class="font-bold text-emerald-400" id="payment-count-paid">0 Orang</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Belum Bayar</p>
+                            <p class="font-bold text-rose-400" id="payment-count-unpaid">0 Orang</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3">
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <button onclick="setPaymentFilter('ALL')" id="payFilter-ALL" class="pay-filter-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white">Semua</button>
+                        <button onclick="setPaymentFilter('PAID')" id="payFilter-PAID" class="pay-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">Lunas</button>
+                        <button onclick="setPaymentFilter('UNPAID')" id="payFilter-UNPAID" class="pay-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">Belum Bayar</button>
+                    </div>
+                    <input type="text" id="paymentSearch" oninput="renderPaymentsList()" placeholder="Cari nama anggota..." class="w-full sm:w-64 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wider">
+                                <th class="p-4">Anggota</th>
+                                <th class="p-4">Geup / Sabuk</th>
+                                <th class="p-4">Iuran Standar</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4">Tgl Pembayaran</th>
+                                <th class="p-4 text-center">Aksi, Struk & WA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentTableBody" class="divide-y divide-slate-100 text-sm">
+                            <!-- Dynamic payment rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW MODE 2: ANNUAL MATRIX -->
+            <div id="paymentMatrixView" class="space-y-6 hidden">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <h3 class="font-bold text-slate-900 text-base">Matriks Iuran Tahunan</h3>
+                            <select id="matrixYearPicker" onchange="renderPaymentMatrix()" class="bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold px-3 py-1.5">
+                                <option value="2026">Tahun 2026</option>
+                                <option value="2025">Tahun 2025</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs">
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Lunas</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Belum</span>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase font-bold text-[10px]">
+                                    <th class="p-3 sticky left-0 bg-slate-50 z-10 min-w-[150px]">Nama Murid</th>
+                                    <th class="p-2 text-center">Jan</th>
+                                    <th class="p-2 text-center">Feb</th>
+                                    <th class="p-2 text-center">Mar</th>
+                                    <th class="p-2 text-center">Apr</th>
+                                    <th class="p-2 text-center">Mei</th>
+                                    <th class="p-2 text-center">Jun</th>
+                                    <th class="p-2 text-center">Jul</th>
+                                    <th class="p-2 text-center">Agu</th>
+                                    <th class="p-2 text-center">Sep</th>
+                                    <th class="p-2 text-center">Okt</th>
+                                    <th class="p-2 text-center">Nov</th>
+                                    <th class="p-2 text-center">Des</th>
+                                    <th class="p-2 text-center">Histori</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentMatrixBody" class="divide-y divide-slate-100">
+                                <!-- Dynamic matrix rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB BILLING -->
+        <section id="tab-billing" class="tab-content space-y-6 hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">Penagihan via WhatsApp</h2>
+                    <p class="text-sm text-slate-500">Kirim pesan pengingat iuran langsung ke nomor HP wali murid</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Nama Bank / E-Wallet Pembayaran</label>
+                        <input type="text" id="bankName" value="BCA / Mandiri / DANA" onchange="saveBankInfo()" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Nomor Rekening / HP</label>
+                        <input type="text" id="bankAccount" value="123-456-7890" onchange="saveBankInfo()" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Atas Nama Rekening</label>
+                        <input type="text" id="bankHolder" value="Dojang elTAHFIDH Taekwondo" onchange="saveBankInfo()" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-bold">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 space-y-4">
+                <h3 class="font-bold text-slate-800 text-sm">Daftar Murid Belum Bayar Bulan Ini</h3>
+                <div id="billingListContainer" class="space-y-3">
+                    <!-- Dynamic billing items -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB ATHLETES (EVALUASI ATLIT LENGKAP & PREDIKAT) -->
+        <section id="tab-athletes" class="tab-content space-y-6 hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-amber-500"></i> Evaluasi Kemampuan & Fisik Atlit
+                    </h2>
+                    <p class="text-sm text-slate-500">Sistem penilaian komprehensif biometrik, fisik, teknik kyorugi, poomsae, disiplin & predikat atlit</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openAthleteReportPreviewModal()" id="btnPrintAthleteCard" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-file-pdf text-rose-400"></i> Pratinjau & Cetak Rapor Atlit
+                    </button>
+                    <button onclick="directSendToSpreadsheet()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Kirim Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Athlete Selector Sidebar Column -->
+                <div class="lg:col-span-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <h3 class="font-bold text-slate-800 text-sm">Daftar Anggota / Atlit</h3>
+                        <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md font-bold" id="athleteListBadge">0 Anggota</span>
+                    </div>
+                    <div class="space-y-2">
+                        <input type="text" id="athleteSearchInput" oninput="renderAthleteSelector()" placeholder="Cari nama anggota..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                        <select id="athleteCategoryFilter" onchange="renderAthleteSelector()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium">
+                            <option value="ALL">Semua Kategori Anggota</option>
+                            <option value="Atlit Kyorugi">Atlit Kyorugi (Fight)</option>
+                            <option value="Atlit Poomsae">Atlit Poomsae (Jurus)</option>
+                            <option value="Reguler">Reguler</option>
+                        </select>
+                    </div>
+                    
+                    <div id="athleteSelectorList" class="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                        <!-- Dynamic selection buttons -->
+                    </div>
+                </div>
+
+                <!-- Comprehensive Evaluation Form & Analytics Column -->
+                <div class="lg:col-span-8 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6" id="athleteDetailsCard">
+                    <!-- Dynamic evaluation form injected by JS -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL: MEMBER CRUD -->
+    <div id="modalMember" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-900 text-base" id="modalMemberTitle">Tambah Murid Baru</h3>
+                <button onclick="closeMemberModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <form id="memberForm" onsubmit="saveMember(event)" class="space-y-3">
+                <input type="hidden" id="editMemberId">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap Murid</label>
+                    <input type="text" id="mName" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nomor WA Wali / Murid</label>
+                    <input type="text" id="mPhone" placeholder="08123456789" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Tingkat Sabuk / Geup</label>
+                        <select id="mGeup" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500">
+                            <option value="Geup 10">Geup 10 (Putih)</option>
+                            <option value="Geup 9">Geup 9 (Kuning)</option>
+                            <option value="Geup 8">Geup 8 (Kuning Hijau)</option>
+                            <option value="Geup 7">Geup 7 (Hijau)</option>
+                            <option value="Geup 6">Geup 6 (Hijau Biru)</option>
+                            <option value="Geup 5">Geup 5 (Biru)</option>
+                            <option value="Geup 4">Geup 4 (Biru Merah)</option>
+                            <option value="Geup 3">Geup 3 (Merah)</option>
+                            <option value="Geup 2">Geup 2 (Merah Hitam)</option>
+                            <option value="DAN 1+">Sabuk Hitam (DAN)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Nominal Iuran (Rp)</label>
+                        <input type="number" id="mFee" value="150000" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Kategori Kelas</label>
+                        <select id="mCategory" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500">
+                            <option value="Reguler">Reguler</option>
+                            <option value="Atlit Kyorugi">Atlit Kyorugi (Fight)</option>
+                            <option value="Atlit Poomsae">Atlit Poomsae (Jurus)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Status Keanggotaan</label>
+                        <select id="mStatus" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-500">
+                            <option value="Aktif">Aktif</option>
+                            <option value="Cuti / Non-Aktif">Cuti / Non-Aktif</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pt-3 flex justify-end gap-2">
+                    <button type="button" onclick="closeMemberModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: RECEIPT PREVIEW, PDF DOWNLOAD & WA SENDER -->
+    <div id="modalReceiptPreview" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[95vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3 no-print">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf text-rose-600 text-xl"></i>
+                    <h3 class="font-bold text-slate-900 text-base">Pratinjau Struk Bukti Pembayaran Lunas</h3>
+                </div>
+                <button onclick="closeReceiptModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- RECEIPT TEMPLATE CONTAINER -->
+            <div id="pdfReceiptTemplate" class="p-6 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 font-sans text-slate-800">
+                <!-- Header Dojang -->
+                <div class="flex justify-between items-start border-b border-slate-300 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div id="appLogoReceipt" class="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-700 via-rose-600 to-amber-500 p-0.5 shadow flex items-center justify-center overflow-hidden">
+                            <!-- Logo JS injected -->
+                        </div>
+                        <div>
+                            <h2 class="font-black text-slate-900 text-lg tracking-tight uppercase">elTAHFIDH TAEKWONDO</h2>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Dojang Integrated System</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="inline-block px-3 py-1 bg-emerald-100 border border-emerald-300 text-emerald-800 text-[11px] font-black uppercase rounded-md tracking-wider">
+                            BUKTI LUNAS
+                        </span>
+                        <p class="text-[10px] text-slate-400 font-mono mt-1" id="rec-id">PAY-0000</p>
+                    </div>
+                </div>
+
+                <!-- Receipt Body Info -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200/80 space-y-2 text-xs">
+                    <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                        <span class="text-slate-500 font-medium">Nama Murid:</span>
+                        <span class="font-bold text-slate-900" id="rec-member-name">-</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                        <span class="text-slate-500 font-medium">ID Anggota / Geup:</span>
+                        <span class="font-semibold text-slate-700" id="rec-member-id">-</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                        <span class="text-slate-500 font-medium">Periode Bulan:</span>
+                        <span class="font-semibold text-slate-800" id="rec-month">-</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-100 pb-1.5">
+                        <span class="text-slate-500 font-medium">Tanggal Pembayaran:</span>
+                        <span class="font-semibold text-slate-800" id="rec-date">-</span>
+                    </div>
+                    <div class="flex justify-between pt-1 text-sm font-extrabold">
+                        <span class="text-slate-800">Total Nominal:</span>
+                        <span class="text-emerald-600 text-base" id="rec-amount">Rp 0</span>
+                    </div>
+                </div>
+
+                <!-- Footer & Verification Note -->
+                <div class="pt-2 flex justify-between items-end text-[10px] text-slate-500">
+                    <div>
+                        <p class="font-semibold text-slate-700">Metode Pembayaran:</p>
+                        <p class="text-slate-500">Kas Dojang / Transfer Bank</p>
+                        <p class="italic text-[9px] text-slate-400 mt-2">Diterbitkan secara resmi oleh Sistem Dojang elTAHFIDH.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-20 h-10 border-b border-dashed border-slate-300 mb-1 flex items-center justify-center">
+                            <span class="text-[9px] text-emerald-600 font-extrabold font-mono border border-emerald-500 px-1 rounded">VERIFIED</span>
+                        </div>
+                        <p class="font-bold text-slate-700 text-[9px]">Pengurus Dojang</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-slate-100 no-print">
+                <button onclick="closeReceiptModal()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl">
+                    Tutup
+                </button>
+                <button onclick="sendActiveReceiptWA()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow">
+                    <i class="fa-brands fa-whatsapp text-sm"></i> Kirim Struk via WA
+                </button>
+                <button id="btnDirectPrint" onclick="executePrintFromModal()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-print"></i> Cetak Struk
+                </button>
+                <button id="btnDownloadPDF" onclick="downloadReceiptPDF()" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-md">
+                    <i class="fa-solid fa-file-pdf"></i> Unduh Berkas PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ATHLETE RAPOR PREVIEW & PRINT/PDF -->
+    <div id="modalAthleteReportPreview" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 max-h-[95vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3 no-print">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-amber-500 text-xl"></i>
+                    <h3 class="font-bold text-slate-900 text-base">Pratinjau Rapor Evaluasi Atlit</h3>
+                </div>
+                <button onclick="closeAthleteReportModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Printable Rapor Template Content -->
+            <div id="pdfAthleteReportTemplate" class="p-8 bg-white border border-slate-200 rounded-2xl space-y-6 font-sans text-slate-800">
+                <!-- Header Rapor -->
+                <div class="flex justify-between items-center border-b-2 border-slate-900 pb-4">
+                    <div class="flex items-center gap-4">
+                        <div id="appLogoRapor" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-700 via-rose-600 to-amber-500 p-0.5 shadow flex items-center justify-center overflow-hidden">
+                            <!-- Logo JS Injected -->
+                        </div>
+                        <div>
+                            <h1 class="font-black text-slate-900 text-xl tracking-tight uppercase">elTAHFIDH TAEKWONDO ACADEMY</h1>
+                            <p class="text-xs text-amber-600 font-bold uppercase tracking-wider">Laporan Evaluasi Performa Atlit Bina Prestasi</p>
+                            <p class="text-[10px] text-slate-400 font-mono">Dokumen Evaluasi Fisik, Teknik & Mental Atlit</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="px-3 py-1.5 bg-amber-50 border border-amber-300 rounded-xl text-center shadow-sm">
+                            <span class="text-[9px] text-amber-700 font-bold block uppercase tracking-wider">PREDIKAT AKHIR</span>
+                            <span class="text-xl font-black text-amber-600" id="rap-grade-badge">A</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 font-mono mt-1" id="rap-date">Tgl: -</p>
+                    </div>
+                </div>
+
+                <!-- Bio & Target Info Grid -->
+                <div class="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div class="space-y-1.5">
+                        <p class="flex justify-between"><span class="text-slate-500 font-medium">Nama Atlit:</span> <span class="font-bold text-slate-900" id="rap-name">-</span></p>
+                        <p class="flex justify-between"><span class="text-slate-500 font-medium">ID / Sabuk Geup:</span> <span class="font-bold text-slate-800" id="rap-id-geup">-</span></p>
+                        <p class="flex justify-between"><span class="text-slate-500 font-medium">Spesialisasi:</span> <span class="font-bold text-blue-700" id="rap-category">-</span></p>
+                        <p class="flex justify-between"><span class="text-slate-500 font-medium">Usia & Gender:</span> <span class="font-semibold text-slate-700" id="rap-age-gender">-</span></p>
+                    </div>
+                    <div class="space-y-1.5">
+                        <p class="flex justify-between"><span class="text-slate-500 font-medium">TB / BB / Kelas:</span> <span class="font-bold text-slate-800" id="rap-biometrics">-</span></p>
+                        <p class="flex justify-between"><span class="text-slate-500 font-medium">Target Event:</span> <span class="font-semibold text-slate-800" id="rap-target-event">-</span></p>
+                        <p class="flex justify-between"><span class="text-slate-500 font-medium">Target Medali:</span> <span class="font-bold text-amber-600" id="rap-target-medal">-</span></p>
+                        <p class="flex justify-between"><span class="text-slate-500 font-medium">Skor Total Rata-Rata:</span> <span class="font-black text-emerald-600" id="rap-overall-score">0 / 100</span></p>
+                    </div>
+                </div>
+
+                <!-- Parameters Score Breakdown -->
+                <div class="space-y-3">
+                    <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider border-b border-slate-200 pb-1">
+                        Rincian Skor Parameter Performa
+                    </h4>
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+                            <div class="flex justify-between font-bold text-slate-800 text-xs border-b border-slate-200 pb-1">
+                                <span>1. Ketahanan & Kondisi Fisik</span>
+                                <span class="text-blue-600" id="rap-score-fisik-avg">0</span>
+                            </div>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Stamina & VO2 Max:</span> <span class="font-bold" id="rap-score-stamina">0</span></p>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Power & Explode:</span> <span class="font-bold" id="rap-score-power">0</span></p>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Kelenturan / Spagat:</span> <span class="font-bold" id="rap-score-flex">0</span></p>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Kelincahan / Footwork:</span> <span class="font-bold" id="rap-score-agility">0</span></p>
+                        </div>
+
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+                            <div class="flex justify-between font-bold text-slate-800 text-xs border-b border-slate-200 pb-1">
+                                <span>2. Teknik Kyorugi (Pertarungan)</span>
+                                <span class="text-blue-600" id="rap-score-kyorugi-avg">0</span>
+                            </div>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Jarak & Distansi:</span> <span class="font-bold" id="rap-score-kdist">0</span></p>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Serangan Balik (Counter):</span> <span class="font-bold" id="rap-score-kcounter">0</span></p>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Tendangan Kepala (Head):</span> <span class="font-bold" id="rap-score-khead">0</span></p>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Variasi Kombinasi:</span> <span class="font-bold" id="rap-score-kcombo">0</span></p>
+                        </div>
+
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+                            <div class="flex justify-between font-bold text-slate-800 text-xs border-b border-slate-200 pb-1">
+                                <span>3. Akurasi & Power Poomsae</span>
+                                <span class="text-blue-600" id="rap-score-poomsae-avg">0</span>
+                            </div>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Stance / Kuda-Kuda:</span> <span class="font-bold" id="rap-score-pstance">0</span></p>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Power Snap Gerakan:</span> <span class="font-bold" id="rap-score-ppower">0</span></p>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Irama & Rhythm:</span> <span class="font-bold" id="rap-score-prhythm">0</span></p>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Keseimbangan Gerak:</span> <span class="font-bold" id="rap-score-pbalance">0</span></p>
+                        </div>
+
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+                            <div class="flex justify-between font-bold text-slate-800 text-xs border-b border-slate-200 pb-1">
+                                <span>4. Mental, Disiplin & Sikap</span>
+                                <span class="text-blue-600" id="rap-score-mental-avg">0</span>
+                            </div>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Kedisiplinan Latihan:</span> <span class="font-bold" id="rap-score-matt">0</span></p>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Semangat Juang (Spirit):</span> <span class="font-bold" id="rap-score-mspirit">0</span></p>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Fokus & Ketenangan:</span> <span class="font-bold" id="rap-score-mfocus">0</span></p>
+                            <p class="flex justify-between text-[11px] text-slate-600"><span>Kerjasama & Respect:</span> <span class="font-bold" id="rap-score-mteam">0</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coach Recommendation Notes -->
+                <div class="bg-amber-50/60 p-4 rounded-xl border border-amber-200 space-y-1 text-xs">
+                    <p class="font-bold text-amber-900 flex items-center gap-1.5">
+                        <i class="fa-solid fa-comment-dots"></i> Catatan & Rekomendasi Pelatih Kepala:
+                    </p>
+                    <p class="text-slate-700 leading-relaxed italic" id="rap-coach-notes">
+                        -
+                    </p>
+                </div>
+
+                <!-- Signatures Section -->
+                <div class="pt-6 flex justify-between items-end text-xs">
+                    <div class="text-center w-40">
+                        <p class="text-slate-500 text-[10px] mb-12">Orang Tua / Wali Atlit</p>
+                        <p class="font-bold text-slate-900 border-t border-slate-300 pt-1">( ..................................... )</p>
+                    </div>
+                    <div class="text-center w-40">
+                        <p class="text-slate-500 text-[10px] mb-12">Pelatih Kepala Dojang</p>
+                        <p class="font-bold text-slate-900 border-t border-slate-300 pt-1">Sabeum / Head Coach</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons for Rapor Modal -->
+            <div class="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-slate-100 no-print">
+                <button onclick="closeAthleteReportModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl">
+                    Tutup
+                </button>
+                <button onclick="executePrintAthleteCard()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-print"></i> Cetak Rapor Langsung
+                </button>
+                <button onclick="downloadAthleteReportPDF()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-md">
+                    <i class="fa-solid fa-file-pdf"></i> Unduh PDF Rapor Atlit
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: LOGO MANAGEMENT & CUSTOMIZATION -->
+    <div id="modalLogoConfig" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-image text-blue-600 text-xl"></i>
+                    <h3 class="font-bold text-slate-900 text-base">Pengaturan Logo Dojang</h3>
+                </div>
+                <button onclick="closeLogoModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Pilih / Unggah Berkas Gambar Logo (PNG/JPG)</label>
+                    <input type="file" id="logoFileInput" accept="image/*" onchange="handleLogoFileUpload(event)" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                </div>
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t border-slate-200"></div>
+                    <span class="flex-shrink mx-2 text-slate-400 text-[10px] font-bold uppercase">Atau tautan URL</span>
+                    <div class="flex-grow border-t border-slate-200"></div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">URL Gambar Logo</label>
+                    <input type="url" id="logoUrlInput" placeholder="https://example.com/logo.png" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                </div>
+
+                <div class="pt-2 flex justify-between gap-2">
+                    <button type="button" onclick="resetToDefaultLogo()" class="px-3 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl font-bold text-[11px]">
+                        Gunakan Logo Vektor Bawaan
+                    </button>
+                    <button type="button" onclick="saveLogoUrl()" class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-xl font-bold shadow">
+                        Simpan Logo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: MEMBER LEDGER -->
+    <div id="modalMemberLedger" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-base" id="ledgerMemberName">Histori Pembayaran</h3>
+                    <p class="text-xs text-slate-500" id="ledgerMemberGeup">Detail transaksi iuran kas</p>
+                </div>
+                <button onclick="closeLedgerModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 border-b border-slate-200">
+                                <th class="p-2.5">Bulan Periode</th>
+                                <th class="p-2.5">Tanggal Bayar</th>
+                                <th class="p-2.5">Nominal</th>
+                                <th class="p-2.5 text-center">Status</th>
+                                <th class="p-2.5 text-center">Struk & WA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledgerTableBody" class="divide-y divide-slate-100 font-medium text-slate-700">
+                            <!-- Dynamic ledger rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="flex justify-end pt-2 border-t border-slate-100">
+                <button onclick="closeLedgerModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SPREADSHEET INTEGRATION -->
+    <div id="modalSheets" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-file-excel text-emerald-600 text-2xl"></i>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base">Integrasi Google Spreadsheet</h3>
+                        <p class="text-[11px] text-slate-500 font-medium">Pengaturan Webhook &amp; Sinkronisasi Laporan Terpusat</p>
+                    </div>
+                </div>
+                <button onclick="closeSheetsModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="bg-slate-900 text-slate-200 rounded-xl p-4 space-y-2 border border-slate-800 flex items-center justify-between">
+                <div>
+                    <span class="font-bold text-emerald-400 text-xs flex items-center gap-2">
+                        <i class="fa-solid fa-code"></i> Skrip Penghubung Google Apps Script
+                    </span>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Otomatis membuat 5 Tab Spreadsheet (Anggota, Presensi, Iuran, Evaluasi Atlit, Summary).</p>
+                </div>
+                <button onclick="copyAppsScriptCode()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow flex-shrink-0">
+                    <i class="fa-solid fa-copy"></i> Salin Skrip Apps Script
+                </button>
+            </div>
+
+            <div class="space-y-3 bg-emerald-50/50 p-4 rounded-xl border border-emerald-200">
+                <label class="block text-xs font-bold text-slate-800">URL Webhook Google Apps Script Deployment</label>
+                <input type="url" id="sheetsWebhookUrl" placeholder="https://script.google.com/macros/s/.../exec" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-emerald-500 font-mono">
+                
+                <div class="flex flex-wrap gap-2 pt-1">
+                    <button onclick="saveWebhookUrl()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan URL Webhook
+                    </button>
+                    <button onclick="syncToSheets()" id="btnSyncAction" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-paper-plane"></i> Kirim Data Saja
+                    </button>
+                </div>
+                <div id="syncLogStatus" class="text-[11px] font-medium text-slate-600 pt-1"></div>
+            </div>
+
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600 space-y-1">
+                <p class="font-bold text-slate-800">Petunjuk Pemasangan Google Apps Script (1x Setup):</p>
+                <ol class="list-decimal list-inside space-y-0.5 text-[10px] text-slate-600">
+                    <li>Buka Google Sheets di Google Drive akun admin spreadsheet Anda.</li>
+                    <li>Klik menu <b>Extensions (Ekstensi) &gt; Apps Script</b>.</li>
+                    <li>Hapus semua kode lama, lalu paste/tempel kode yang disalin di atas.</li>
+                    <li>Klik <b>Deploy &gt; New Deployment</b>, pilih Type: <b>Web app</b>.</li>
+                    <li>Set <i>Execute as</i>: <b>Me</b>, <i>Who has access</i>: <b>Anyone</b>.</li>
+                    <li>Klik Deploy, berikan izin/authorize, salin URL Web App dan paste di kolom di atas.</li>
+                </ol>
+            </div>
+
+            <div class="flex justify-end pt-2 border-t border-slate-100">
+                <button onclick="closeSheetsModal()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CUSTOM CONFIRMATION DIALOG -->
+    <div id="modalConfirm" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4 text-center">
+            <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 mx-auto flex items-center justify-center text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-slate-900 text-base" id="confirmTitle">Konfirmasi</h3>
+                <p class="text-xs text-slate-500 mt-1" id="confirmMessage">Apakah Anda yakin ingin melakukan tindakan ini?</p>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeConfirmModal(false)" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl">Batal</button>
+                <button id="confirmOkBtn" onclick="closeConfirmModal(true)" class="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow">Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Printable Area for Receipts & Printable Athlete Evaluation Cards -->
+    <div id="printableReceiptArea" class="hidden p-8 bg-white text-slate-900 font-sans"></div>
+    <div id="printableAthleteCardArea" class="hidden p-8 bg-white text-slate-900 font-sans"></div>
+
+    <script>
+        // DEFAULT TAEKWONDO EMBLEM SVG LOGO
+        const DEFAULT_TAEKWONDO_LOGO_SVG = `
+            <svg viewBox="0 0 100 100" class="w-full h-full">
+                <circle cx="50" cy="50" r="48" fill="#0F172A" />
+                <circle cx="50" cy="50" r="44" fill="none" stroke="#F59E0B" stroke-width="2.5" />
+                <path d="M50,10 A40,40 0 0,1 50,90 A20,20 0 0,1 50,50 A20,20 0 0,0 50,10" fill="#E11D48" />
+                <path d="M50,90 A40,40 0 0,1 50,10 A20,20 0 0,1 50,50 A20,20 0 0,0 50,90" fill="#2563EB" />
+                <g fill="#FFFFFF">
+                    <circle cx="34" cy="28" r="5" />
+                    <path d="M32,35 L40,38 L48,42 L58,35 L62,38 L50,48 L42,43 L32,58 L26,56 L34,40 Z" />
+                    <path d="M42,43 L68,34 L88,26 L90,20 L92,23 L90,30 L69,42 L42,52 Z" />
+                    <path d="M32,58 L28,78 L22,90 L29,91 L35,80 L38,60 Z" />
+                </g>
+                <path d="M15,58 Q50,75 85,58 L87,63 Q50,82 13,63 Z" fill="#000000" stroke="#F59E0B" stroke-width="0.8" />
+            </svg>
+        `;
+
+        // APP STATE & SAMPLE DATA
+        const DEFAULT_MEMBERS = [
+            { id: 'MEM-001', name: 'Ahmad Raihan', phone: '081234567890', geup: 'Geup 10', category: 'Reguler', fee: 150000, status: 'Aktif' },
+            { id: 'MEM-002', name: 'Siti Nurhaliza', phone: '082198765432', geup: 'Geup 8', category: 'Atlit Poomsae', fee: 150000, status: 'Aktif' },
+            { id: 'MEM-003', name: 'Budi Santoso', phone: '085711223344', geup: 'Geup 5', category: 'Atlit Kyorugi', fee: 150000, status: 'Aktif' },
+            { id: 'MEM-004', name: 'Dini Farida', phone: '081399887766', geup: 'Geup 2', category: 'Atlit Kyorugi', fee: 150000, status: 'Aktif' },
+            { id: 'MEM-005', name: 'Eko Prasetyo', phone: '087855443322', geup: 'DAN 1+', category: 'Reguler', fee: 150000, status: 'Aktif' }
+        ];
+
+        // DEFAULT DETAILED ATHLETE EVALUATION RECORDS
+        const DEFAULT_ATHLETE_SKILLS = {
+            'MEM-002': {
+                height: 158, weight: 48, weightClass: 'Under 49 kg Cadet', age: 14, gender: 'Putri', category: 'Atlit Poomsae',
+                targetEvent: 'Kejurda Jabar & Kejurnas Junior 2026', targetMedal: 'Emas Poomsae Individual',
+                scores: {
+                    stamina: 82, power: 85, flexibility: 90, agility: 80,
+                    kyorugiDist: 70, kyorugiCounter: 68, kyorugiHead: 65, kyorugiCombo: 65,
+                    poomsaeStance: 92, poomsaePower: 88, poomsaeRhythm: 90, poomsaeBalance: 86,
+                    mentalAtt: 95, mentalSpirit: 88, mentalFocus: 92, mentalTeam: 90
+                },
+                coachNotes: 'Siti memiliki kelenturan dan akurasi stance poomsae yang sangat prima. Perlu penguatan pada snap dan power akhir gerakan.',
+                lastEvaluated: '2026-09-15'
+            },
+            'MEM-003': {
+                height: 172, weight: 63, weightClass: 'Under 63 kg Junior', age: 16, gender: 'Putra', category: 'Atlit Kyorugi',
+                targetEvent: 'Taekwondo Open Championship 2026', targetMedal: 'Emas Kyorugi Male',
+                scores: {
+                    stamina: 88, power: 90, flexibility: 78, agility: 85,
+                    kyorugiDist: 86, kyorugiCounter: 89, kyorugiHead: 84, kyorugiCombo: 88,
+                    poomsaeStance: 70, poomsaePower: 75, poomsaeRhythm: 68, poomsaeBalance: 72,
+                    mentalAtt: 90, mentalSpirit: 94, mentalFocus: 85, mentalTeam: 88
+                },
+                coachNotes: 'Budi memiliki serangan balik (counter) cepat dan daya ledak tendangan tinggi. Pertahankan timing dan fleksibilitas spagat.',
+                lastEvaluated: '2026-09-20'
+            },
+            'MEM-004': {
+                height: 165, weight: 53, weightClass: 'Under 53 kg Senior', age: 18, gender: 'Putri', category: 'Atlit Kyorugi',
+                targetEvent: 'Kejurnas Mahasiswa & Pra-PON', targetMedal: 'Perak / Emas Kyorugi',
+                scores: {
+                    stamina: 85, power: 82, flexibility: 88, agility: 86,
+                    kyorugiDist: 88, kyorugiCounter: 82, kyorugiHead: 91, kyorugiCombo: 85,
+                    poomsaeStance: 75, poomsaePower: 78, poomsaeRhythm: 72, poomsaeBalance: 76,
+                    mentalAtt: 92, mentalSpirit: 90, mentalFocus: 88, mentalTeam: 92
+                },
+                coachNotes: 'Tendangan kepala (Naeryo & Duit Chagi) Dini sangat akurat. Perlu peningkatan kekuatan fisik leg-press.',
+                lastEvaluated: '2026-09-22'
+            }
+        };
+
+        let members = JSON.parse(localStorage.getItem('elta_members')) || DEFAULT_MEMBERS;
+        let payments = JSON.parse(localStorage.getItem('elta_payments')) || [];
+        let attendanceSessions = JSON.parse(localStorage.getItem('elta_attendance')) || [];
+        let athleteSkills = JSON.parse(localStorage.getItem('elta_athletes')) || DEFAULT_ATHLETE_SKILLS;
+        let bankInfo = JSON.parse(localStorage.getItem('elta_bank')) || { name: 'BCA / Mandiri / DANA', account: '123-456-7890', holder: 'Dojang elTAHFIDH Taekwondo' };
+        let customLogoUrl = localStorage.getItem('elta_logo_url') || null;
+
+        let activeTab = 'dashboard';
+        let currentPaymentFilter = 'ALL';
+        let currentPaymentViewMode = 'monthly';
+        let currentSelectedAthleteId = null;
+        let athleteRadarChartInstance = null;
+        let activeReceiptPaymentId = null;
+        let confirmCallback = null;
+
+        window.onload = function() {
+            initPWA();
+
+            const today = new Date().toISOString().split('T')[0];
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            
+            document.getElementById('attendanceDatePicker').value = today;
+            document.getElementById('paymentMonthPicker').value = currentMonth;
+            
+            document.getElementById('bankName').value = bankInfo.name;
+            document.getElementById('bankAccount').value = bankInfo.account;
+            document.getElementById('bankHolder').value = bankInfo.holder;
+
+            const savedWebhook = localStorage.getItem('sheets_webhook_url');
+            if (savedWebhook) {
+                document.getElementById('sheetsWebhookUrl').value = savedWebhook;
+                updateSheetStatusBadge(true);
+            } else {
+                updateSheetStatusBadge(false);
+            }
+
+            renderAppLogos();
+            generateMonthlyPaymentsIfMissing(currentMonth);
+
+            renderDashboard();
+            renderMembersList();
+            loadAttendanceForDate();
+            renderPaymentsList();
+            renderBillingList();
+            renderAthleteModule();
+        };
+
+        function initPWA() {
+            const manifest = {
+                name: "elTAHFIDH TAEKWONDO INTEGRATED SYSTEM",
+                short_name: "elTAHFIDH",
+                description: "Sistem Manajemen Dojang & Evaluasi Atlit Taekwondo elTAHFIDH",
+                start_url: "./",
+                display: "standalone",
+                background_color: "#0F172A",
+                theme_color: "#0F172A",
+                icons: [
+                    {
+                        src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%230F172A'/><text x='50%' y='55%' font-size='35' text-anchor='middle' fill='%23F59E0B' font-family='sans-serif' font-weight='bold'>TKD</text></svg>",
+                        sizes: "192x192 512x512",
+                        type: "image/svg+xml",
+                        purpose: "any maskable"
+                    }
+                ]
+            };
+            
+            const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+            const manifestUrl = URL.createObjectURL(manifestBlob);
+            
+            let link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = manifestUrl;
+            document.head.appendChild(link);
+        }
+
+        function renderAppLogos() {
+            const logoContainers = ['appLogoMobile', 'appLogoSidebar', 'appLogoReceipt', 'appLogoRapor'];
+            logoContainers.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (customLogoUrl) {
+                    el.innerHTML = `<img src="${customLogoUrl}" alt="Logo Dojang" class="w-full h-full object-cover rounded-lg">`;
+                } else {
+                    el.innerHTML = DEFAULT_TAEKWONDO_LOGO_SVG;
+                }
+            });
+        }
+
+        function openLogoModal() {
+            document.getElementById('logoUrlInput').value = customLogoUrl || '';
+            document.getElementById('modalLogoConfig').classList.remove('hidden');
+        }
+
+        function closeLogoModal() {
+            document.getElementById('modalLogoConfig').classList.add('hidden');
+        }
+
+        function handleLogoFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    customLogoUrl = e.target.result;
+                    localStorage.setItem('elta_logo_url', customLogoUrl);
+                    renderAppLogos();
+                    showToast('Logo berhasil diperbarui.');
+                    closeLogoModal();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveLogoUrl() {
+            const url = document.getElementById('logoUrlInput').value.trim();
+            if (url) {
+                customLogoUrl = url;
+                localStorage.setItem('elta_logo_url', customLogoUrl);
+                renderAppLogos();
+                showToast('URL logo berhasil disimpan.');
+            }
+            closeLogoModal();
+        }
+
+        function resetToDefaultLogo() {
+            customLogoUrl = null;
+            localStorage.removeItem('elta_logo_url');
+            renderAppLogos();
+            showToast('Logo dikembalikan ke emblem bawaan.');
+            closeLogoModal();
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.innerText = msg;
+            if (type === 'success') {
+                toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-lg';
+            } else if (type === 'error') {
+                toastIcon.className = 'fa-solid fa-triangle-exclamation text-rose-400 text-lg';
+            } else {
+                toastIcon.className = 'fa-solid fa-info-circle text-blue-400 text-lg';
+            }
+
+            toast.classList.remove('hidden', 'translate-x-full');
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        function openConfirmModal(title, msg, onOk) {
+            document.getElementById('confirmTitle').innerText = title;
+            document.getElementById('confirmMessage').innerText = msg;
+            confirmCallback = onOk;
+            document.getElementById('modalConfirm').classList.remove('hidden');
+        }
+
+        function closeConfirmModal(result) {
+            document.getElementById('modalConfirm').classList.add('hidden');
+            if (result && typeof confirmCallback === 'function') {
+                confirmCallback();
+            }
+            confirmCallback = null;
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden');
+        }
+
+        function switchTab(tabId) {
+            activeTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('bg-blue-600', 'text-white', 'active', 'shadow-md');
+                el.classList.add('text-slate-400');
+            });
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.add('bg-blue-600', 'text-white', 'active', 'shadow-md');
+                activeNav.classList.remove('text-slate-400');
+            }
+
+            document.querySelectorAll('.mobile-nav-item').forEach(el => {
+                el.classList.remove('text-blue-500', 'text-amber-400');
+                el.classList.add('text-slate-400');
+            });
+            const activeMnav = document.getElementById(`mnav-${tabId}`);
+            if (activeMnav) {
+                activeMnav.classList.add(tabId === 'athletes' ? 'text-amber-400' : 'text-blue-500');
+                activeMnav.classList.remove('text-slate-400');
+            }
+
+            if (tabId === 'dashboard') renderDashboard();
+            if (tabId === 'members') renderMembersList();
+            if (tabId === 'attendance') loadAttendanceForDate();
+            if (tabId === 'payments') renderPaymentsList();
+            if (tabId === 'billing') renderBillingList();
+            if (tabId === 'athletes') renderAthleteModule();
+
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('hidden');
+            }
+        }
+
+        function renderDashboard() {
+            const totalMembers = members.length;
+            const activeMembers = members.filter(m => m.status === 'Aktif').length;
+            const currentMonth = new Date().toISOString().slice(0, 7);
+
+            const monthPayments = payments.filter(p => p.month === currentMonth);
+            const paidPayments = monthPayments.filter(p => p.status === 'LUNAS');
+            const totalCollected = paidPayments.reduce((acc, curr) => acc + (curr.amount || 0), 0);
+
+            const unpaidPayments = monthPayments.filter(p => p.status !== 'LUNAS');
+            const totalUnpaid = unpaidPayments.reduce((acc, curr) => acc + (curr.amount || 0), 0);
+
+            const athleteMembers = members.filter(m => m.category && m.category.includes('Atlit'));
+
+            document.getElementById('dash-total-members').innerText = totalMembers;
+            document.getElementById('dash-active-members').innerText = activeMembers;
+            document.getElementById('dash-total-collected').innerText = 'Rp ' + totalCollected.toLocaleString('id-ID');
+            document.getElementById('dash-paid-ratio').innerText = `${paidPayments.length}/${members.length}`;
+            document.getElementById('dash-unpaid-amount').innerText = 'Rp ' + totalUnpaid.toLocaleString('id-ID');
+            document.getElementById('dash-unpaid-count').innerText = unpaidPayments.length;
+            document.getElementById('dash-athlete-count').innerText = athleteMembers.length;
+
+            const athleteContainer = document.getElementById('dashboardAthleteList');
+            if (athleteMembers.length === 0) {
+                athleteContainer.innerHTML = '<p class="text-xs text-slate-400 italic py-2 text-center">Belum ada murid kategori atlit.</p>';
+            } else {
+                athleteContainer.innerHTML = athleteMembers.map(m => `
+                    <div class="p-2.5 bg-slate-50 border border-slate-100 rounded-xl flex justify-between items-center text-xs hover:border-amber-300 transition">
+                        <div>
+                            <p class="font-bold text-slate-800">${m.name}</p>
+                            <p class="text-[10px] text-slate-500">${m.geup} • ${m.category}</p>
+                        </div>
+                        <button onclick="switchTab('athletes'); selectAthleteForEval('${m.id}')" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-[10px] shadow">
+                            Evaluasi
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderMembersList() {
+            const search = document.getElementById('memberSearch').value.toLowerCase();
+            const filterGeup = document.getElementById('memberGeupFilter').value;
+            const container = document.getElementById('membersGridContainer');
+
+            const filtered = members.filter(m => {
+                const matchesSearch = m.name.toLowerCase().includes(search) || m.id.toLowerCase().includes(search);
+                const matchesGeup = filterGeup === 'ALL' || m.geup === filterGeup;
+                return matchesSearch && matchesGeup;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full py-8 text-center text-xs text-slate-400">Tidak ada murid yang sesuai filter.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(m => `
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between space-y-4 hover:shadow transition">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 font-black flex items-center justify-center text-sm">
+                                ${m.name.charAt(0)}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-sm">${m.name}</h4>
+                                <p class="text-[11px] text-slate-400 font-mono">${m.id}</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-full ${m.status === 'Aktif' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}">
+                            ${m.status}
+                        </span>
+                    </div>
+
+                    <div class="space-y-1.5 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400 font-medium">Sabuk / Geup:</span>
+                            <span class="font-bold text-slate-800">${m.geup}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400 font-medium">Kategori:</span>
+                            <span class="font-semibold text-slate-700">${m.category}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400 font-medium">Nominal Iuran:</span>
+                            <span class="font-bold text-emerald-600">Rp ${(m.fee || 150000).toLocaleString('id-ID')}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400 font-medium">No. WA Wali:</span>
+                            <span class="font-mono text-slate-700">${m.phone}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
+                        <button onclick="openMemberModal('${m.id}')" class="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs transition">
+                            <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+                        </button>
+                        <button onclick="openMemberLedger('${m.id}')" class="flex-1 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-lg text-xs transition">
+                            <i class="fa-solid fa-receipt mr-1"></i> Ledger
+                        </button>
+                        <button onclick="deleteMemberPrompt('${m.id}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold rounded-lg text-xs transition" title="Hapus Murid">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openMemberModal(memberId = null) {
+            const modal = document.getElementById('modalMember');
+            const form = document.getElementById('memberForm');
+            form.reset();
+
+            if (memberId) {
+                const member = members.find(m => m.id === memberId);
+                if (member) {
+                    document.getElementById('modalMemberTitle').innerText = 'Edit Data Murid';
+                    document.getElementById('editMemberId').value = member.id;
+                    document.getElementById('mName').value = member.name;
+                    document.getElementById('mPhone').value = member.phone;
+                    document.getElementById('mGeup').value = member.geup;
+                    document.getElementById('mFee').value = member.fee || 150000;
+                    document.getElementById('mCategory').value = member.category;
+                    document.getElementById('mStatus').value = member.status;
+                }
+            } else {
+                document.getElementById('modalMemberTitle').innerText = 'Tambah Murid Baru';
+                document.getElementById('editMemberId').value = '';
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeMemberModal() {
+            document.getElementById('modalMember').classList.add('hidden');
+        }
+
+        function saveMember(event) {
+            event.preventDefault();
+            const editId = document.getElementById('editMemberId').value;
+            const name = document.getElementById('mName').value.trim();
+            const phone = document.getElementById('mPhone').value.trim();
+            const geup = document.getElementById('mGeup').value;
+            const fee = parseInt(document.getElementById('mFee').value) || 150000;
+            const category = document.getElementById('mCategory').value;
+            const status = document.getElementById('mStatus').value;
+
+            if (editId) {
+                const idx = members.findIndex(m => m.id === editId);
+                if (idx !== -1) {
+                    members[idx] = { id: editId, name, phone, geup, fee, category, status };
+                    showToast('Data murid berhasil diperbarui.');
+                }
+            } else {
+                const newId = 'MEM-' + String(members.length + 1).padStart(3, '0');
+                members.push({ id: newId, name, phone, geup, fee, category, status });
+                showToast('Murid baru berhasil ditambahkan.');
+            }
+
+            localStorage.setItem('elta_members', JSON.stringify(members));
+            closeMemberModal();
+            renderMembersList();
+            renderDashboard();
+            renderAthleteModule();
+        }
+
+        function deleteMemberPrompt(memberId) {
+            openConfirmModal(
+                'Hapus Data Murid',
+                'Apakah Anda yakin ingin menghapus murid ini dari database Dojang?',
+                () => {
+                    members = members.filter(m => m.id !== memberId);
+                    localStorage.setItem('elta_members', JSON.stringify(members));
+                    showToast('Data murid telah dihapus.');
+                    renderMembersList();
+                    renderDashboard();
+                    renderAthleteModule();
+                }
+            );
+        }
+
+        function loadAttendanceForDate() {
+            const selectedDate = document.getElementById('attendanceDatePicker').value;
+            let session = attendanceSessions.find(s => s.date === selectedDate);
+            
+            if (session) {
+                document.getElementById('attendanceTopicInput').value = session.topic || '';
+            } else {
+                document.getElementById('attendanceTopicInput').value = '';
+            }
+            renderAttendanceList();
+            renderAttendanceHistoryLog();
+        }
+
+        function renderAttendanceList() {
+            const selectedDate = document.getElementById('attendanceDatePicker').value;
+            const search = document.getElementById('attSearchInput').value.toLowerCase();
+            const container = document.getElementById('attendanceListContainer');
+
+            let session = attendanceSessions.find(s => s.date === selectedDate) || { records: {} };
+            const activeMembers = members.filter(m => m.status === 'Aktif' && m.name.toLowerCase().includes(search));
+
+            let countHadir = 0, countIzin = 0, countSakit = 0, countAlfa = 0;
+
+            container.innerHTML = activeMembers.map(m => {
+                const currentStatus = session.records[m.id] || 'Hadir';
+                if (currentStatus === 'Hadir') countHadir++;
+                if (currentStatus === 'Izin') countIzin++;
+                if (currentStatus === 'Sakit') countSakit++;
+                if (currentStatus === 'Alfa') countAlfa++;
+
+                return `
+                    <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between gap-2">
+                        <div>
+                            <p class="font-bold text-slate-800 text-xs">${m.name}</p>
+                            <p class="text-[10px] text-slate-500">${m.geup}</p>
+                        </div>
+                        <div class="flex gap-1">
+                            ${['Hadir', 'Izin', 'Sakit', 'Alfa'].map(st => {
+                                const isSelected = currentStatus === st;
+                                let colorClass = 'bg-white text-slate-600 border-slate-200';
+                                if (isSelected) {
+                                    if (st === 'Hadir') colorClass = 'bg-emerald-600 text-white font-bold border-emerald-600';
+                                    if (st === 'Izin') colorClass = 'bg-amber-500 text-white font-bold border-amber-500';
+                                    if (st === 'Sakit') colorClass = 'bg-blue-600 text-white font-bold border-blue-600';
+                                    if (st === 'Alfa') colorClass = 'bg-rose-600 text-white font-bold border-rose-600';
+                                }
+                                return `
+                                    <button onclick="setAttendanceStatus('${m.id}', '${st}')" class="px-2 py-1 rounded-lg text-[10px] border transition ${colorClass}">
+                                        ${st}
+                                    </button>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('att-count-hadir').innerText = countHadir;
+            document.getElementById('att-count-izin').innerText = countIzin;
+            document.getElementById('att-count-sakit').innerText = countSakit;
+            document.getElementById('att-count-alfa').innerText = countAlfa;
+        }
+
+        function setAttendanceStatus(memberId, status) {
+            const selectedDate = document.getElementById('attendanceDatePicker').value;
+            let sessionIdx = attendanceSessions.findIndex(s => s.date === selectedDate);
+            
+            if (sessionIdx === -1) {
+                const newSession = {
+                    date: selectedDate,
+                    topic: document.getElementById('attendanceTopicInput').value.trim() || 'Latihan Rutin',
+                    records: {}
+                };
+                newSession.records[memberId] = status;
+                attendanceSessions.push(newSession);
+            } else {
+                attendanceSessions[sessionIdx].records[memberId] = status;
+            }
+
+            renderAttendanceList();
+        }
+
+        function markAllAttendance(status) {
+            const selectedDate = document.getElementById('attendanceDatePicker').value;
+            let session = attendanceSessions.find(s => s.date === selectedDate);
+
+            if (!session) {
+                session = {
+                    date: selectedDate,
+                    topic: document.getElementById('attendanceTopicInput').value.trim() || 'Latihan Rutin',
+                    records: {}
+                };
+                attendanceSessions.push(session);
+            }
+
+            members.forEach(m => {
+                if (m.status === 'Aktif') {
+                    session.records[m.id] = status;
+                }
+            });
+
+            renderAttendanceList();
+            showToast(`Seluruh anggota diset: ${status}`);
+        }
+
+        function saveAttendanceSession() {
+            const selectedDate = document.getElementById('attendanceDatePicker').value;
+            const topic = document.getElementById('attendanceTopicInput').value.trim() || 'Latihan Rutin Dojang';
+
+            let session = attendanceSessions.find(s => s.date === selectedDate);
+            if (!session) {
+                session = { date: selectedDate, topic: topic, records: {} };
+                members.forEach(m => {
+                    if (m.status === 'Aktif') session.records[m.id] = 'Hadir';
+                });
+                attendanceSessions.push(session);
+            } else {
+                session.topic = topic;
+            }
+
+            localStorage.setItem('elta_attendance', JSON.stringify(attendanceSessions));
+            showToast('Sesi presensi latihan berhasil disimpan.');
+            renderAttendanceHistoryLog();
+        }
+
+        function renderAttendanceHistoryLog() {
+            const logContainer = document.getElementById('attendanceHistoryLog');
+            if (attendanceSessions.length === 0) {
+                logContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Belum ada riwayat presensi yang tersimpan.</p>`;
+                return;
+            }
+
+            const sorted = [...attendanceSessions].sort((a, b) => b.date.localeCompare(a.date));
+            logContainer.innerHTML = sorted.map(s => {
+                const totalRecords = Object.keys(s.records || {}).length;
+                const totalHadir = Object.values(s.records || {}).filter(v => v === 'Hadir').length;
+                return `
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex justify-between items-center text-xs">
+                        <div>
+                            <span class="font-bold text-slate-800">${s.date}</span>
+                            <p class="text-slate-500 font-medium">${s.topic || 'Latihan Rutin'}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-bold text-emerald-600">${totalHadir}/${totalRecords} Hadir</span>
+                            <button onclick="document.getElementById('attendanceDatePicker').value='${s.date}'; loadAttendanceForDate();" class="block text-[10px] text-blue-600 hover:underline mt-0.5">
+                                Buka Sesi
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function generateMonthlyPaymentsIfMissing(monthStr) {
+            members.forEach(m => {
+                const existing = payments.find(p => p.memberId === m.id && p.month === monthStr);
+                if (!existing) {
+                    payments.push({
+                        id: 'PAY-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+                        memberId: m.id,
+                        month: monthStr,
+                        amount: m.fee || 150000,
+                        status: 'BELUM',
+                        paidDate: '-'
+                    });
+                }
+            });
+            localStorage.setItem('elta_payments', JSON.stringify(payments));
+        }
+
+        function setPaymentViewMode(mode) {
+            currentPaymentViewMode = mode;
+            if (mode === 'monthly') {
+                document.getElementById('paymentMonthlyView').classList.remove('hidden');
+                document.getElementById('paymentMatrixView').classList.add('hidden');
+                document.getElementById('btnViewMonthly').className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-slate-900 shadow';
+                document.getElementById('btnViewMatrix').className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900';
+                renderPaymentsList();
+            } else {
+                document.getElementById('paymentMonthlyView').classList.add('hidden');
+                document.getElementById('paymentMatrixView').classList.remove('hidden');
+                document.getElementById('btnViewMatrix').className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-slate-900 shadow';
+                document.getElementById('btnViewMonthly').className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900';
+                renderPaymentMatrix();
+            }
+        }
+
+        function setPaymentFilter(filter) {
+            currentPaymentFilter = filter;
+            document.querySelectorAll('.pay-filter-btn').forEach(btn => {
+                btn.className = 'pay-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200';
+            });
+            const activeBtn = document.getElementById(`payFilter-${filter}`);
+            if (activeBtn) activeBtn.className = 'pay-filter-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white';
+            renderPaymentsList();
+        }
+
+        function renderPaymentsList() {
+            const monthStr = document.getElementById('paymentMonthPicker').value;
+            generateMonthlyPaymentsIfMissing(monthStr);
+
+            const search = document.getElementById('paymentSearch').value.toLowerCase();
+            const tableBody = document.getElementById('paymentTableBody');
+
+            const monthPayments = payments.filter(p => p.month === monthStr);
+            let totalAmount = 0, countPaid = 0, countUnpaid = 0;
+
+            monthPayments.forEach(p => {
+                if (p.status === 'LUNAS') {
+                    totalAmount += p.amount;
+                    countPaid++;
+                } else {
+                    countUnpaid++;
+                }
+            });
+
+            document.getElementById('payment-total-amount').innerText = 'Rp ' + totalAmount.toLocaleString('id-ID');
+            document.getElementById('payment-count-paid').innerText = `${countPaid} Orang`;
+            document.getElementById('payment-count-unpaid').innerText = `${countUnpaid} Orang`;
+
+            const filtered = monthPayments.filter(p => {
+                const member = members.find(m => m.id === p.memberId);
+                if (!member) return false;
+                const matchesSearch = member.name.toLowerCase().includes(search) || member.id.toLowerCase().includes(search);
+                const matchesFilter = currentPaymentFilter === 'ALL' || 
+                                     (currentPaymentFilter === 'PAID' && p.status === 'LUNAS') ||
+                                     (currentPaymentFilter === 'UNPAID' && p.status !== 'LUNAS');
+                return matchesSearch && matchesFilter;
+            });
+
+            if (filtered.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-xs text-slate-400">Tidak ada data iuran pada filter ini.</td></tr>`;
+                return;
+            }
+
+            tableBody.innerHTML = filtered.map(p => {
+                const member = members.find(m => m.id === p.memberId) || { name: 'Unknown', geup: '-' };
+                const isPaid = p.status === 'LUNAS';
+
+                return `
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-4 font-bold text-slate-800">
+                            ${member.name}
+                            <span class="block text-[10px] text-slate-400 font-mono font-normal">${member.id}</span>
+                        </td>
+                        <td class="p-4 text-xs font-semibold text-slate-600">${member.geup}</td>
+                        <td class="p-4 text-xs font-bold text-slate-700">Rp ${(p.amount || 150000).toLocaleString('id-ID')}</td>
+                        <td class="p-4">
+                            <span class="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold ${isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                                ${isPaid ? 'LUNAS' : 'BELUM BAYAR'}
+                            </span>
+                        </td>
+                        <td class="p-4 text-xs text-slate-500 font-mono">${p.paidDate || '-'}</td>
+                        <td class="p-4 text-center space-x-1">
+                            <button onclick="togglePaymentStatus('${p.id}')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${isPaid ? 'bg-amber-100 hover:bg-amber-200 text-amber-800' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow'}">
+                                ${isPaid ? 'Batalkan Lunas' : 'Tandai Lunas'}
+                            </button>
+                            ${isPaid ? `
+                                <button onclick="openReceiptModal('${p.id}')" class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-lg text-xs transition" title="Lihat Struk PDF">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </button>
+                                <button onclick="sendReceiptWA('${p.id}')" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-lg text-xs transition" title="Kirim Struk WA">
+                                    <i class="fa-brands fa-whatsapp"></i>
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function togglePaymentStatus(payId) {
+            const p = payments.find(item => item.id === payId);
+            if (p) {
+                if (p.status === 'LUNAS') {
+                    p.status = 'BELUM';
+                    p.paidDate = '-';
+                    showToast('Status pembayaran diubah menjadi BELUM.');
+                } else {
+                    p.status = 'LUNAS';
+                    p.paidDate = new Date().toISOString().split('T')[0];
+                    showToast('Pembayaran berhasil ditandai LUNAS.');
+                }
+                localStorage.setItem('elta_payments', JSON.stringify(payments));
+                renderPaymentsList();
+                renderDashboard();
+            }
+        }
+
+        function renderPaymentMatrix() {
+            const year = document.getElementById('matrixYearPicker').value;
+            const body = document.getElementById('paymentMatrixBody');
+
+            body.innerHTML = members.map(m => {
+                let monthCols = '';
+                for (let i = 1; i <= 12; i++) {
+                    const monthStr = `${year}-${String(i).padStart(2, '0')}`;
+                    const p = payments.find(pay => pay.memberId === m.id && pay.month === monthStr);
+                    const isPaid = p && p.status === 'LUNAS';
+
+                    monthCols += `
+                        <td class="p-2 text-center">
+                            <span class="inline-block w-3.5 h-3.5 rounded-full ${isPaid ? 'bg-emerald-500' : 'bg-rose-200'}" title="${monthStr}: ${isPaid ? 'LUNAS' : 'BELUM'}"></span>
+                        </td>
+                    `;
+                }
+
+                return `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-bold text-slate-800 sticky left-0 bg-white z-10 border-r border-slate-100">
+                            ${m.name}
+                            <span class="block text-[9px] text-slate-400 font-mono">${m.geup}</span>
+                        </td>
+                        ${monthCols}
+                        <td class="p-2 text-center">
+                            <button onclick="openMemberLedger('${m.id}')" class="text-blue-600 hover:text-blue-800 font-bold underline text-[11px]">Ledger</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openReceiptModal(payId) {
+            const p = payments.find(item => item.id === payId);
+            if (!p) return;
+
+            const member = members.find(m => m.id === p.memberId) || { name: 'Atlit', id: '-' };
+            activeReceiptPaymentId = payId;
+
+            document.getElementById('rec-id').innerText = p.id;
+            document.getElementById('rec-member-name').innerText = member.name;
+            document.getElementById('rec-member-id').innerText = `${member.id} (${member.geup || '-'})`;
+            document.getElementById('rec-month').innerText = p.month;
+            document.getElementById('rec-date').innerText = p.paidDate || '-';
+            document.getElementById('rec-amount').innerText = 'Rp ' + (p.amount || 150000).toLocaleString('id-ID');
+
+            document.getElementById('modalReceiptPreview').classList.remove('hidden');
+        }
+
+        function closeReceiptModal() {
+            document.getElementById('modalReceiptPreview').classList.add('hidden');
+        }
+
+        function executePrintFromModal() {
+            const template = document.getElementById('pdfReceiptTemplate').innerHTML;
+            const printArea = document.getElementById('printableReceiptArea');
+            printArea.innerHTML = template;
+            printArea.classList.remove('hidden');
+            window.print();
+            printArea.classList.add('hidden');
+        }
+
+        function downloadReceiptPDF() {
+            const element = document.getElementById('pdfReceiptTemplate');
+            const opt = {
+                margin:       [10, 10, 10, 10],
+                filename:     `Struk_Iuran_${document.getElementById('rec-id').innerText}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a5', orientation: 'landscape' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        function sendActiveReceiptWA() {
+            if (activeReceiptPaymentId) sendReceiptWA(activeReceiptPaymentId);
+        }
+
+        function sendReceiptWA(payId) {
+            const p = payments.find(item => item.id === payId);
+            if (!p) return;
+            const member = members.find(m => m.id === p.memberId);
+            if (!member || !member.phone) {
+                showToast('Nomor WA anggota tidak valid.', 'error');
+                return;
+            }
+
+            let phone = member.phone.replace(/[^0-9]/g, '');
+            if (phone.startsWith('0')) phone = '62' + phone.slice(1);
+
+            const msg = `*BUKTI PEMBAYARAN IURAN - elTAHFIDH TAEKWONDO*\n\n` +
+                        `Terima kasih, pembayaran iuran kas dojang telah kami terima dengan rincian:\n` +
+                        `- *No Struk:* ${p.id}\n` +
+                        `- *Nama Murid:* ${member.name}\n` +
+                        `- *Periode Bulan:* ${p.month}\n` +
+                        `- *Nominal:* Rp ${(p.amount || 150000).toLocaleString('id-ID')}\n` +
+                        `- *Status:* LUNAS (${p.paidDate})\n\n` +
+                        `Salam Hormat,\n*Pengurus Dojang elTAHFIDH*`;
+
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function renderBillingList() {
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            generateMonthlyPaymentsIfMissing(currentMonth);
+
+            const container = document.getElementById('billingListContainer');
+            const unpaid = payments.filter(p => p.month === currentMonth && p.status !== 'LUNAS');
+
+            if (unpaid.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-xs text-emerald-600 font-bold bg-emerald-50 rounded-xl border border-emerald-200">Seluruh murid sudah melunasi iuran bulan ini!</div>`;
+                return;
+            }
+
+            container.innerHTML = unpaid.map(p => {
+                const member = members.find(m => m.id === p.memberId) || { name: 'Murid', phone: '-' };
+                return `
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center gap-3 hover:border-slate-300 transition">
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm">${member.name}</h4>
+                            <p class="text-xs text-slate-500">${member.geup} • WA: ${member.phone}</p>
+                            <p class="text-xs font-bold text-rose-600 mt-0.5">Tunggakan: Rp ${(p.amount || 150000).toLocaleString('id-ID')}</p>
+                        </div>
+                        <button onclick="sendWABilling('${member.id}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow">
+                            <i class="fa-brands fa-whatsapp text-sm"></i> Kirim WA Tagihan
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function sendWABilling(memberId) {
+            const member = members.find(m => m.id === memberId);
+            if (!member || !member.phone) {
+                showToast('Nomor WA murid tidak tersedia.', 'error');
+                return;
+            }
+
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            let phone = member.phone.replace(/[^0-9]/g, '');
+            if (phone.startsWith('0')) phone = '62' + phone.slice(1);
+
+            const msg = `*PENGINGAT IURAN BULANAN - elTAHFIDH TAEKWONDO*\n\n` +
+                        `Yth. Orang Tua / Wali dari *${member.name}*,\n\n` +
+                        `Pemberitahuan iuran kas bulanan Dojang periode *${currentMonth}* sebesar *Rp ${(member.fee || 150000).toLocaleString('id-ID')}*.\n\n` +
+                        `Pembayaran dapat ditransfer melalui:\n` +
+                        `- *Bank/E-Wallet:* ${bankInfo.name}\n` +
+                        `- *No Rekening:* ${bankInfo.account}\n` +
+                        `- *Atas Nama:* ${bankInfo.holder}\n\n` +
+                        `Mohon konfirmasi bukti transfer jika sudah melakukan pembayaran. Terima kasih atas perhatiaannya.`;
+
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function saveBankInfo() {
+            bankInfo = {
+                name: document.getElementById('bankName').value,
+                account: document.getElementById('bankAccount').value,
+                holder: document.getElementById('bankHolder').value
+            };
+            localStorage.setItem('elta_bank', JSON.stringify(bankInfo));
+            showToast('Informasi rekening bank berhasil diperbarui.');
+        }
+
+        function openMemberLedger(memberId) {
+            const member = members.find(m => m.id === memberId);
+            if (!member) return;
+
+            document.getElementById('ledgerMemberName').innerText = `Histori Pembayaran: ${member.name}`;
+            document.getElementById('ledgerMemberGeup').innerText = `${member.id} • ${member.geup} • ${member.category}`;
+
+            const memberPayments = payments.filter(p => p.memberId === memberId).sort((a, b) => b.month.localeCompare(a.month));
+            const body = document.getElementById('ledgerTableBody');
+
+            if (memberPayments.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-xs text-slate-400">Belum ada riwayat transaksi.</td></tr>`;
+            } else {
+                body.innerHTML = memberPayments.map(p => `
+                    <tr>
+                        <td class="p-2.5 font-bold text-slate-800">${p.month}</td>
+                        <td class="p-2.5 text-slate-500">${p.paidDate || '-'}</td>
+                        <td class="p-2.5 font-bold text-slate-800">Rp ${(p.amount || 150000).toLocaleString('id-ID')}</td>
+                        <td class="p-2.5 text-center">
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${p.status === 'LUNAS' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                                ${p.status}
+                            </span>
+                        </td>
+                        <td class="p-2.5 text-center space-x-1">
+                            ${p.status === 'LUNAS' ? `
+                                <button onclick="openReceiptModal('${p.id}')" class="text-blue-600 hover:underline font-bold text-[11px]">Struk</button>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            document.getElementById('modalMemberLedger').classList.remove('hidden');
+        }
+
+        function closeLedgerModal() {
+            document.getElementById('modalMemberLedger').classList.add('hidden');
+        }
+
+        // ==========================================
+        // FITUR EVALUASI ATLIT (PERBAIKAN SUNGGUH-SUNGGUH)
+        // ==========================================
+        function renderAthleteModule() {
+            renderAthleteSelector();
+            if (!currentSelectedAthleteId && members.length > 0) {
+                // Default ke murid pertama jika belum dipilih
+                selectAthleteForEval(members[0].id);
+            } else if (currentSelectedAthleteId) {
+                renderAthleteDetailsCard();
+            }
+        }
+
+        function renderAthleteSelector() {
+            const search = (document.getElementById('athleteSearchInput')?.value || '').toLowerCase();
+            const categoryFilter = document.getElementById('athleteCategoryFilter')?.value || 'ALL';
+            const container = document.getElementById('athleteSelectorList');
+            const badge = document.getElementById('athleteListBadge');
+
+            if (!container) return;
+
+            const filteredMembers = members.filter(m => {
+                const matchesSearch = m.name.toLowerCase().includes(search) || m.id.toLowerCase().includes(search);
+                const matchesCategory = categoryFilter === 'ALL' || m.category === categoryFilter;
+                return matchesSearch && matchesCategory;
+            });
+
+            if (badge) badge.innerText = `${filteredMembers.length} Anggota`;
+
+            if (filteredMembers.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic py-4 text-center">Tidak ada murid sesuai kriteria.</p>`;
+                return;
+            }
+
+            container.innerHTML = filteredMembers.map(m => {
+                const isSelected = currentSelectedAthleteId === m.id;
+                const hasEvaluation = !!athleteSkills[m.id];
+
+                return `
+                    <button onclick="selectAthleteForEval('${m.id}')" class="w-full text-left p-3 rounded-xl border transition flex items-center justify-between gap-2 ${isSelected ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800'}">
+                        <div>
+                            <p class="font-bold text-xs ${isSelected ? 'text-white' : 'text-slate-800'}">${m.name}</p>
+                            <p class="text-[10px] ${isSelected ? 'text-amber-300' : 'text-slate-500'} font-medium">${m.geup} • ${m.category}</p>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            ${hasEvaluation ? `<span class="w-2 h-2 rounded-full bg-emerald-400" title="Telah Dievaluasi"></span>` : `<span class="w-2 h-2 rounded-full bg-amber-400" title="Belum Dievaluasi"></span>`}
+                            <i class="fa-solid fa-chevron-right text-xs opacity-60"></i>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectAthleteForEval(memberId) {
+            currentSelectedAthleteId = memberId;
+
+            // Inisialisasi struktur penilaian standar jika anggota baru/belum ada data evaluasi
+            if (!athleteSkills[memberId]) {
+                const member = members.find(m => m.id === memberId);
+                athleteSkills[memberId] = {
+                    height: 160,
+                    weight: 50,
+                    weightClass: 'Kategori Latihan',
+                    age: 15,
+                    gender: 'Putra',
+                    category: member ? member.category : 'Reguler',
+                    targetEvent: 'Kejuaraan Dojang / Daerah 2026',
+                    targetMedal: 'Target Medali Emas',
+                    scores: {
+                        stamina: 75, power: 75, flexibility: 75, agility: 75,
+                        kyorugiDist: 75, kyorugiCounter: 75, kyorugiHead: 75, kyorugiCombo: 75,
+                        poomsaeStance: 75, poomsaePower: 75, poomsaeRhythm: 75, poomsaeBalance: 75,
+                        mentalAtt: 80, mentalSpirit: 80, mentalFocus: 80, mentalTeam: 80
+                    },
+                    coachNotes: '',
+                    lastEvaluated: new Date().toISOString().split('T')[0]
+                };
+            }
+
+            renderAthleteSelector();
+            renderAthleteDetailsCard();
+        }
+
+        function renderAthleteDetailsCard() {
+            const card = document.getElementById('athleteDetailsCard');
+            if (!card || !currentSelectedAthleteId) return;
+
+            const member = members.find(m => m.id === currentSelectedAthleteId);
+            if (!member) {
+                card.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">Pilih murid terlebih dahulu.</p>`;
+                return;
+            }
+
+            const data = athleteSkills[currentSelectedAthleteId];
+            const s = data.scores || {};
+
+            // Hitung Rata-rata Sub Divisi
+            const avgFisik = Math.round(((s.stamina||0) + (s.power||0) + (s.flexibility||0) + (s.agility||0)) / 4);
+            const avgKyorugi = Math.round(((s.kyorugiDist||0) + (s.kyorugiCounter||0) + (s.kyorugiHead||0) + (s.kyorugiCombo||0)) / 4);
+            const avgPoomsae = Math.round(((s.poomsaeStance||0) + (s.poomsaePower||0) + (s.poomsaeRhythm||0) + (s.poomsaeBalance||0)) / 4);
+            const avgMental = Math.round(((s.mentalAtt||0) + (s.mentalSpirit||0) + (s.mentalFocus||0) + (s.mentalTeam||0)) / 4);
+            const overallScore = Math.round((avgFisik + avgKyorugi + avgPoomsae + avgMental) / 4);
+
+            let gradeBadge = 'A';
+            let gradeColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+            if (overallScore >= 90) { gradeBadge = 'A+ (Istimewa)'; gradeColor = 'bg-amber-100 text-amber-900 border-amber-300'; }
+            else if (overallScore >= 80) { gradeBadge = 'A (Sangat Baik)'; gradeColor = 'bg-emerald-100 text-emerald-800 border-emerald-300'; }
+            else if (overallScore >= 70) { gradeBadge = 'B (Baik)'; gradeColor = 'bg-blue-100 text-blue-800 border-blue-300'; }
+            else if (overallScore >= 60) { gradeBadge = 'C (Berkembang)'; gradeColor = 'bg-amber-50 text-amber-800 border-amber-200'; }
+            else { gradeBadge = 'D (Perlu Pembinaan)'; gradeColor = 'bg-rose-100 text-rose-800 border-rose-300'; }
+
+            card.innerHTML = `
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-xl font-black text-slate-900">${member.name}</h3>
+                            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono">${member.id}</span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium">${member.geup} • Kategori: <span class="font-bold text-blue-600">${member.category}</span></p>
+                    </div>
+                    <div class="text-right flex sm:flex-col items-center sm:items-end justify-between">
+                        <span class="text-[10px] text-slate-400 font-mono block">Terakhir Dievaluasi: ${data.lastEvaluated || '-'}</span>
+                        <div class="px-3 py-1 rounded-xl border text-xs font-black shadow-sm ${gradeColor}">
+                            Total Skor: ${overallScore}/100 (${gradeBadge})
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Biometrik & Target Atlit -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-ruler-combined text-blue-600"></i> Profil Biometrik & Target Event
+                    </h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                        <div>
+                            <label class="block font-medium text-slate-600 mb-1">Tinggi (cm)</label>
+                            <input type="number" id="evalHeight" value="${data.height || 160}" onchange="updateAthleteFormState()" class="w-full p-2 bg-white border border-slate-200 rounded-xl font-bold">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-600 mb-1">Berat (kg)</label>
+                            <input type="number" id="evalWeight" value="${data.weight || 50}" onchange="updateAthleteFormState()" class="w-full p-2 bg-white border border-slate-200 rounded-xl font-bold">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-600 mb-1">Usia (Thn)</label>
+                            <input type="number" id="evalAge" value="${data.age || 15}" onchange="updateAthleteFormState()" class="w-full p-2 bg-white border border-slate-200 rounded-xl font-bold">
+                        </div>
+                        <div>
+                            <label class="block font-medium text-slate-600 mb-1">Gender</label>
+                            <select id="evalGender" onchange="updateAthleteFormState()" class="w-full p-2 bg-white border border-slate-200 rounded-xl font-bold">
+                                <option value="Putra" ${data.gender === 'Putra' ? 'selected' : ''}>Putra</option>
+                                <option value="Putri" ${data.gender === 'Putri' ? 'selected' : ''}>Putri</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block font-medium text-slate-600 mb-1">Kelas Tanding / Berat</label>
+                            <input type="text" id="evalWeightClass" value="${data.weightClass || ''}" placeholder="Misal: Under 54kg Senior Male" onchange="updateAthleteFormState()" class="w-full p-2 bg-white border border-slate-200 rounded-xl font-medium">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block font-medium text-slate-600 mb-1">Target Event Kejuaraan</label>
+                            <input type="text" id="evalTargetEvent" value="${data.targetEvent || ''}" placeholder="Kejuaraan Target..." onchange="updateAthleteFormState()" class="w-full p-2 bg-white border border-slate-200 rounded-xl font-medium">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Radar Chart Visual Analytics -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col items-center">
+                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-1.5 self-start">
+                        <i class="fa-solid fa-chart-radar text-amber-500"></i> Diagram Radar Performa Atlit
+                    </h4>
+                    <div class="w-full max-w-sm h-64 flex justify-center">
+                        <canvas id="athleteRadarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Parameters Rating Form Sliders -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <!-- 1. Kondisi Fisik -->
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+                        <div class="flex justify-between items-center border-b border-slate-200 pb-1.5">
+                            <span class="font-bold text-slate-800">1. Ketahanan & Kondisi Fisik</span>
+                            <span class="font-black text-blue-600" id="valAvgFisik">${avgFisik}</span>
+                        </div>
+                        <div class="space-y-2">
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Stamina & VO2 Max</span><span id="txt-stamina" class="font-bold text-slate-800">${s.stamina||75}</span></div>
+                                <input type="range" id="sk-stamina" min="40" max="100" value="${s.stamina||75}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Power & Daya Ledak</span><span id="txt-power" class="font-bold text-slate-800">${s.power||75}</span></div>
+                                <input type="range" id="sk-power" min="40" max="100" value="${s.power||75}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Kelenturan / Spagat</span><span id="txt-flexibility" class="font-bold text-slate-800">${s.flexibility||75}</span></div>
+                                <input type="range" id="sk-flexibility" min="40" max="100" value="${s.flexibility||75}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Kelincahan / Footwork</span><span id="txt-agility" class="font-bold text-slate-800">${s.agility||75}</span></div>
+                                <input type="range" id="sk-agility" min="40" max="100" value="${s.agility||75}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Teknik Kyorugi -->
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+                        <div class="flex justify-between items-center border-b border-slate-200 pb-1.5">
+                            <span class="font-bold text-slate-800">2. Teknik Kyorugi (Pertarungan)</span>
+                            <span class="font-black text-blue-600" id="valAvgKyorugi">${avgKyorugi}</span>
+                        </div>
+                        <div class="space-y-2">
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Jarak & Distansi</span><span id="txt-kyorugiDist" class="font-bold text-slate-800">${s.kyorugiDist||75}</span></div>
+                                <input type="range" id="sk-kyorugiDist" min="40" max="100" value="${s.kyorugiDist||75}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Serangan Balik (Counter)</span><span id="txt-kyorugiCounter" class="font-bold text-slate-800">${s.kyorugiCounter||75}</span></div>
+                                <input type="range" id="sk-kyorugiCounter" min="40" max="100" value="${s.kyorugiCounter||75}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Tendangan Kepala</span><span id="txt-kyorugiHead" class="font-bold text-slate-800">${s.kyorugiHead||75}</span></div>
+                                <input type="range" id="sk-kyorugiHead" min="40" max="100" value="${s.kyorugiHead||75}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Variasi Kombinasi</span><span id="txt-kyorugiCombo" class="font-bold text-slate-800">${s.kyorugiCombo||75}</span></div>
+                                <input type="range" id="sk-kyorugiCombo" min="40" max="100" value="${s.kyorugiCombo||75}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Teknik Poomsae -->
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+                        <div class="flex justify-between items-center border-b border-slate-200 pb-1.5">
+                            <span class="font-bold text-slate-800">3. Akurasi & Power Poomsae</span>
+                            <span class="font-black text-blue-600" id="valAvgPoomsae">${avgPoomsae}</span>
+                        </div>
+                        <div class="space-y-2">
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Stance / Kuda-Kuda</span><span id="txt-poomsaeStance" class="font-bold text-slate-800">${s.poomsaeStance||75}</span></div>
+                                <input type="range" id="sk-poomsaeStance" min="40" max="100" value="${s.poomsaeStance||75}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Power Snap Gerakan</span><span id="txt-poomsaePower" class="font-bold text-slate-800">${s.poomsaePower||75}</span></div>
+                                <input type="range" id="sk-poomsaePower" min="40" max="100" value="${s.poomsaePower||75}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Irama & Rhythm</span><span id="txt-poomsaeRhythm" class="font-bold text-slate-800">${s.poomsaeRhythm||75}</span></div>
+                                <input type="range" id="sk-poomsaeRhythm" min="40" max="100" value="${s.poomsaeRhythm||75}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Keseimbangan Gerak</span><span id="txt-poomsaeBalance" class="font-bold text-slate-800">${s.poomsaeBalance||75}</span></div>
+                                <input type="range" id="sk-poomsaeBalance" min="40" max="100" value="${s.poomsaeBalance||75}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Mental & Disiplin -->
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+                        <div class="flex justify-between items-center border-b border-slate-200 pb-1.5">
+                            <span class="font-bold text-slate-800">4. Mental, Disiplin & Sikap</span>
+                            <span class="font-black text-blue-600" id="valAvgMental">${avgMental}</span>
+                        </div>
+                        <div class="space-y-2">
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Kedisiplinan Latihan</span><span id="txt-mentalAtt" class="font-bold text-slate-800">${s.mentalAtt||80}</span></div>
+                                <input type="range" id="sk-mentalAtt" min="40" max="100" value="${s.mentalAtt||80}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Semangat Juang (Spirit)</span><span id="txt-mentalSpirit" class="font-bold text-slate-800">${s.mentalSpirit||80}</span></div>
+                                <input type="range" id="sk-mentalSpirit" min="40" max="100" value="${s.mentalSpirit||80}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Fokus & Ketenangan</span><span id="txt-mentalFocus" class="font-bold text-slate-800">${s.mentalFocus||80}</span></div>
+                                <input type="range" id="sk-mentalFocus" min="40" max="100" value="${s.mentalFocus||80}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-medium text-slate-600"><span>Kerjasama & Respect</span><span id="txt-mentalTeam" class="font-bold text-slate-800">${s.mentalTeam||80}</span></div>
+                                <input type="range" id="sk-mentalTeam" min="40" max="100" value="${s.mentalTeam||80}" oninput="updateAthleteFormState()" class="w-full accent-blue-600">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coach Notes -->
+                <div class="space-y-1.5 text-xs">
+                    <label class="block font-bold text-slate-800">Catatan & Rekomendasi Pelatih Kepala</label>
+                    <textarea id="evalCoachNotes" rows="3" placeholder="Tuliskan catatan perkembangan fisik, mental, serta evaluasi kejuaraan..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-medium">${data.coachNotes || ''}</textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pt-2 flex flex-wrap justify-end items-center gap-3 border-t border-slate-100">
+                    <button onclick="openAthleteReportPreviewModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-pdf text-rose-400"></i> Pratinjau Rapor PDF
+                    </button>
+                    <button onclick="saveAthleteEvaluation()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Simpan Hasil Evaluasi
+                    </button>
+                </div>
+            `;
+
+            renderAthleteRadarChart(avgFisik, avgKyorugi, avgPoomsae, avgMental);
+        }
+
+        function updateAthleteFormState() {
+            // Membaca nilai dari slider & input fisik
+            const getVal = (id) => parseInt(document.getElementById(id)?.value) || 0;
+
+            const stamina = getVal('sk-stamina');
+            const power = getVal('sk-power');
+            const flexibility = getVal('sk-flexibility');
+            const agility = getVal('sk-agility');
+
+            const kyorugiDist = getVal('sk-kyorugiDist');
+            const kyorugiCounter = getVal('sk-kyorugiCounter');
+            const kyorugiHead = getVal('sk-kyorugiHead');
+            const kyorugiCombo = getVal('sk-kyorugiCombo');
+
+            const poomsaeStance = getVal('sk-poomsaeStance');
+            const poomsaePower = getVal('sk-poomsaePower');
+            const poomsaeRhythm = getVal('sk-poomsaeRhythm');
+            const poomsaeBalance = getVal('sk-poomsaeBalance');
+
+            const mentalAtt = getVal('sk-mentalAtt');
+            const mentalSpirit = getVal('sk-mentalSpirit');
+            const mentalFocus = getVal('sk-mentalFocus');
+            const mentalTeam = getVal('sk-mentalTeam');
+
+            // Update teks nilai live
+            const keys = ['stamina','power','flexibility','agility','kyorugiDist','kyorugiCounter','kyorugiHead','kyorugiCombo','poomsaeStance','poomsaePower','poomsaeRhythm','poomsaeBalance','mentalAtt','mentalSpirit','mentalFocus','mentalTeam'];
+            const values = [stamina,power,flexibility,agility,kyorugiDist,kyorugiCounter,kyorugiHead,kyorugiCombo,poomsaeStance,poomsaePower,poomsaeRhythm,poomsaeBalance,mentalAtt,mentalSpirit,mentalFocus,mentalTeam];
+
+            keys.forEach((k, idx) => {
+                const txtEl = document.getElementById(`txt-${k}`);
+                if (txtEl) txtEl.innerText = values[idx];
+            });
+
+            // Kalkulasi rata-rata
+            const avgFisik = Math.round((stamina + power + flexibility + agility) / 4);
+            const avgKyorugi = Math.round((kyorugiDist + kyorugiCounter + kyorugiHead + kyorugiCombo) / 4);
+            const avgPoomsae = Math.round((poomsaeStance + poomsaePower + poomsaeRhythm + poomsaeBalance) / 4);
+            const avgMental = Math.round((mentalAtt + mentalSpirit + mentalFocus + mentalTeam) / 4);
+
+            if (document.getElementById('valAvgFisik')) document.getElementById('valAvgFisik').innerText = avgFisik;
+            if (document.getElementById('valAvgKyorugi')) document.getElementById('valAvgKyorugi').innerText = avgKyorugi;
+            if (document.getElementById('valAvgPoomsae')) document.getElementById('valAvgPoomsae').innerText = avgPoomsae;
+            if (document.getElementById('valAvgMental')) document.getElementById('valAvgMental').innerText = avgMental;
+
+            // Render ulang radar chart
+            renderAthleteRadarChart(avgFisik, avgKyorugi, avgPoomsae, avgMental);
+        }
+
+        function renderAthleteRadarChart(avgFisik, avgKyorugi, avgPoomsae, avgMental) {
+            const canvas = document.getElementById('athleteRadarChart');
+            if (!canvas) return;
+
+            if (athleteRadarChartInstance) {
+                athleteRadarChartInstance.destroy();
+            }
+
+            const ctx = canvas.getContext('2d');
+            athleteRadarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Kondisi Fisik', 'Teknik Kyorugi', 'Teknik Poomsae', 'Mental & Disiplin'],
+                    datasets: [{
+                        label: 'Skor Performa',
+                        data: [avgFisik, avgKyorugi, avgPoomsae, avgMental],
+                        backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                        borderColor: '#2563EB',
+                        pointBackgroundColor: '#E11D48',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#E11D48',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#e2e8f0' },
+                            grid: { color: '#cbd5e1' },
+                            suggestedMin: 40,
+                            suggestedMax: 100,
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function saveAthleteEvaluation() {
+            if (!currentSelectedAthleteId) return;
+
+            const getVal = (id) => parseInt(document.getElementById(id)?.value) || 0;
+
+            const evalData = {
+                height: parseInt(document.getElementById('evalHeight')?.value) || 160,
+                weight: parseInt(document.getElementById('evalWeight')?.value) || 50,
+                age: parseInt(document.getElementById('evalAge')?.value) || 15,
+                gender: document.getElementById('evalGender')?.value || 'Putra',
+                weightClass: document.getElementById('evalWeightClass')?.value || 'Cadet/Junior',
+                targetEvent: document.getElementById('evalTargetEvent')?.value || 'Kejuaraan Target',
+                targetMedal: 'Target Medali Emas',
+                scores: {
+                    stamina: getVal('sk-stamina'),
+                    power: getVal('sk-power'),
+                    flexibility: getVal('sk-flexibility'),
+                    agility: getVal('sk-agility'),
+                    kyorugiDist: getVal('sk-kyorugiDist'),
+                    kyorugiCounter: getVal('sk-kyorugiCounter'),
+                    kyorugiHead: getVal('sk-kyorugiHead'),
+                    kyorugiCombo: getVal('sk-kyorugiCombo'),
+                    poomsaeStance: getVal('sk-poomsaeStance'),
+                    poomsaePower: getVal('sk-poomsaePower'),
+                    poomsaeRhythm: getVal('sk-poomsaeRhythm'),
+                    poomsaeBalance: getVal('sk-poomsaeBalance'),
+                    mentalAtt: getVal('sk-mentalAtt'),
+                    mentalSpirit: getVal('sk-mentalSpirit'),
+                    mentalFocus: getVal('sk-mentalFocus'),
+                    mentalTeam: getVal('sk-mentalTeam')
+                },
+                coachNotes: document.getElementById('evalCoachNotes')?.value || '',
+                lastEvaluated: new Date().toISOString().split('T')[0]
+            };
+
+            athleteSkills[currentSelectedAthleteId] = evalData;
+            localStorage.setItem('elta_athletes', JSON.stringify(athleteSkills));
+
+            showToast('Evaluasi performa atlit berhasil disimpan!');
+            renderAthleteSelector();
+            renderAthleteDetailsCard();
+            renderDashboard();
+        }
+
+        function openAthleteReportPreviewModal() {
+            if (!currentSelectedAthleteId) {
+                showToast('Pilih murid terlebih dahulu.', 'error');
+                return;
+            }
+
+            const member = members.find(m => m.id === currentSelectedAthleteId);
+            const data = athleteSkills[currentSelectedAthleteId] || {};
+            const s = data.scores || {};
+
+            const avgFisik = Math.round(((s.stamina||0) + (s.power||0) + (s.flexibility||0) + (s.agility||0)) / 4);
+            const avgKyorugi = Math.round(((s.kyorugiDist||0) + (s.kyorugiCounter||0) + (s.kyorugiHead||0) + (s.kyorugiCombo||0)) / 4);
+            const avgPoomsae = Math.round(((s.poomsaeStance||0) + (s.poomsaePower||0) + (s.poomsaeRhythm||0) + (s.poomsaeBalance||0)) / 4);
+            const avgMental = Math.round(((s.mentalAtt||0) + (s.mentalSpirit||0) + (s.mentalFocus||0) + (s.mentalTeam||0)) / 4);
+            const overallScore = Math.round((avgFisik + avgKyorugi + avgPoomsae + avgMental) / 4);
+
+            let gradeLetter = 'A';
+            if (overallScore >= 90) gradeLetter = 'A+';
+            else if (overallScore >= 80) gradeLetter = 'A';
+            else if (overallScore >= 70) gradeLetter = 'B';
+            else if (overallScore >= 60) gradeLetter = 'C';
+            else gradeLetter = 'D';
+
+            document.getElementById('rap-grade-badge').innerText = gradeLetter;
+            document.getElementById('rap-date').innerText = `Tgl: ${data.lastEvaluated || new Date().toISOString().split('T')[0]}`;
+            document.getElementById('rap-name').innerText = member ? member.name : '-';
+            document.getElementById('rap-id-geup').innerText = `${member ? member.id : '-'} (${member ? member.geup : '-'})`;
+            document.getElementById('rap-category').innerText = member ? member.category : '-';
+            document.getElementById('rap-age-gender').innerText = `${data.age || '-'} Thn / ${data.gender || '-'}`;
+            document.getElementById('rap-biometrics').innerText = `${data.height || 0} cm / ${data.weight || 0} kg (${data.weightClass || '-'})`;
+            document.getElementById('rap-target-event').innerText = data.targetEvent || '-';
+            document.getElementById('rap-target-medal').innerText = data.targetMedal || 'Target Emas';
+            document.getElementById('rap-overall-score').innerText = `${overallScore} / 100`;
+
+            // Rincian Skor
+            document.getElementById('rap-score-fisik-avg').innerText = avgFisik;
+            document.getElementById('rap-score-stamina').innerText = s.stamina || 0;
+            document.getElementById('rap-score-power').innerText = s.power || 0;
+            document.getElementById('rap-score-flex').innerText = s.flexibility || 0;
+            document.getElementById('rap-score-agility').innerText = s.agility || 0;
+
+            document.getElementById('rap-score-kyorugi-avg').innerText = avgKyorugi;
+            document.getElementById('rap-score-kdist').innerText = s.kyorugiDist || 0;
+            document.getElementById('rap-score-kcounter').innerText = s.kyorugiCounter || 0;
+            document.getElementById('rap-score-khead').innerText = s.kyorugiHead || 0;
+            document.getElementById('rap-score-kcombo').innerText = s.kyorugiCombo || 0;
+
+            document.getElementById('rap-score-poomsae-avg').innerText = avgPoomsae;
+            document.getElementById('rap-score-pstance').innerText = s.poomsaeStance || 0;
+            document.getElementById('rap-score-ppower').innerText = s.poomsaePower || 0;
+            document.getElementById('rap-score-prhythm').innerText = s.poomsaeRhythm || 0;
+            document.getElementById('rap-score-pbalance').innerText = s.poomsaeBalance || 0;
+
+            document.getElementById('rap-score-mental-avg').innerText = avgMental;
+            document.getElementById('rap-score-matt').innerText = s.mentalAtt || 0;
+            document.getElementById('rap-score-mspirit').innerText = s.mentalSpirit || 0;
+            document.getElementById('rap-score-mfocus').innerText = s.mentalFocus || 0;
+            document.getElementById('rap-score-mteam').innerText = s.mentalTeam || 0;
+
+            document.getElementById('rap-coach-notes').innerText = data.coachNotes ? `"${data.coachNotes}"` : 'Belum ada catatan khusus pelatih.';
+
+            document.getElementById('modalAthleteReportPreview').classList.remove('hidden');
+        }
+
+        function closeAthleteReportModal() {
+            document.getElementById('modalAthleteReportPreview').classList.add('hidden');
+        }
+
+        function executePrintAthleteCard() {
+            const template = document.getElementById('pdfAthleteReportTemplate').innerHTML;
+            const printArea = document.getElementById('printableAthleteCardArea');
+            printArea.innerHTML = template;
+            printArea.classList.remove('hidden');
+            window.print();
+            printArea.classList.add('hidden');
+        }
+
+        function downloadAthleteReportPDF() {
+            const element = document.getElementById('pdfAthleteReportTemplate');
+            const member = members.find(m => m.id === currentSelectedAthleteId);
+            const nameStr = member ? member.name.replace(/\s+/g, '_') : 'Atlit';
+
+            const opt = {
+                margin:       [10, 10, 10, 10],
+                filename:     `Rapor_Evaluasi_${nameStr}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // ==========================================
+        // INTEGRASI SPREADSHEET & UTILITIES
+        // ==========================================
+        function updateSheetStatusBadge(isConnected) {
+            const badge = document.getElementById('sheetStatusBadge');
+            if (isConnected) {
+                badge.className = 'text-[10px] bg-emerald-900/60 text-emerald-300 px-2 py-0.5 rounded cursor-pointer border border-emerald-500 hover:border-emerald-400 transition font-mono';
+                badge.innerHTML = `<i class="fa-solid fa-file-excel mr-1 text-emerald-400"></i>Terhubung`;
+            } else {
+                badge.className = 'text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded cursor-pointer border border-slate-600 hover:border-amber-500 transition font-mono';
+                badge.innerHTML = `<i class="fa-solid fa-plug-circle-xmark mr-1 text-amber-400"></i>Belum Connect`;
+            }
+        }
+
+        function openSheetsModal() {
+            document.getElementById('modalSheets').classList.remove('hidden');
+        }
+
+        function closeSheetsModal() {
+            document.getElementById('modalSheets').classList.add('hidden');
+        }
+
+        function saveWebhookUrl() {
+            const url = document.getElementById('sheetsWebhookUrl').value.trim();
+            if (url) {
+                localStorage.setItem('sheets_webhook_url', url);
+                updateSheetStatusBadge(true);
+                showToast('URL Webhook Google Sheets berhasil disimpan!');
+            } else {
+                localStorage.removeItem('sheets_webhook_url');
+                updateSheetStatusBadge(false);
+                showToast('URL Webhook dihapus.', 'info');
+            }
+        }
+
+        function copyAppsScriptCode() {
+            const scriptCode = `
+// ========================================================
+// KODE GOOGLE APPS SCRIPT DOANG INTEGRATED SYSTEM
+// ========================================================
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+    // 1. TAB ANGGOTA
+    var sheetMembers = getOrCreateSheet(ss, "Anggota");
+    sheetMembers.clear();
+    sheetMembers.appendRow(["ID Anggota", "Nama Lengkap", "Nomor WA", "Geup / Sabuk", "Kategori", "Iuran Std", "Status"]);
+    if (data.members && data.members.length > 0) {
+      data.members.forEach(function(m) {
+        sheetMembers.appendRow([m.id, m.name, m.phone, m.geup, m.category, m.fee, m.status]);
+      });
+    }
+
+    // 2. TAB PRESENSI
+    var sheetAtt = getOrCreateSheet(ss, "Presensi");
+    sheetAtt.clear();
+    sheetAtt.appendRow(["Tanggal", "Topik / Materi", "ID Anggota", "Status Kehadiran"]);
+    if (data.attendance && data.attendance.length > 0) {
+      data.attendance.forEach(function(s) {
+        for (var memberId in s.records) {
+          sheetAtt.appendRow([s.date, s.topic || 'Latihan', memberId, s.records[memberId]]);
+        }
+      });
+    }
+
+    // 3. TAB IURAN
+    var sheetPay = getOrCreateSheet(ss, "Iuran");
+    sheetPay.clear();
+    sheetPay.appendRow(["ID Struk", "ID Anggota", "Bulan Periode", "Nominal", "Status", "Tgl Pembayaran"]);
+    if (data.payments && data.payments.length > 0) {
+      data.payments.forEach(function(p) {
+        sheetPay.appendRow([p.id, p.memberId, p.month, p.amount, p.status, p.paidDate]);
+      });
+    }
+
+    // 4. TAB EVALUASI ATLIT
+    var sheetAth = getOrCreateSheet(ss, "Evaluasi Atlit");
+    sheetAth.clear();
+    sheetAth.appendRow(["ID Anggota", "Tinggi (cm)", "Berat (kg)", "Kelas Tanding", "Skor Fisik", "Skor Kyorugi", "Skor Poomsae", "Skor Mental", "Total Skor", "Catatan Pelatih", "Tgl Evaluasi"]);
+    if (data.athletes) {
+      for (var memberId in data.athletes) {
+        var a = data.athletes[memberId];
+        var s = a.scores || {};
+        var avgF = Math.round(((s.stamina||0)+(s.power||0)+(s.flexibility||0)+(s.agility||0))/4);
+        var avgK = Math.round(((s.kyorugiDist||0)+(s.kyorugiCounter||0)+(s.kyorugiHead||0)+(s.kyorugiCombo||0))/4);
+        var avgP = Math.round(((s.poomsaeStance||0)+(s.poomsaePower||0)+(s.poomsaeRhythm||0)+(s.poomsaeBalance||0))/4);
+        var avgM = Math.round(((s.mentalAtt||0)+(s.mentalSpirit||0)+(s.mentalFocus||0)+(s.mentalTeam||0))/4);
+        var total = Math.round((avgF + avgK + avgP + avgM)/4);
+        sheetAth.appendRow([memberId, a.height, a.weight, a.weightClass, avgF, avgK, avgP, avgM, total, a.coachNotes, a.lastEvaluated]);
+      }
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({"status": "success", "message": "Data ter-sync sepenuhnya"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function getOrCreateSheet(ss, name) {
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) sheet = ss.insertSheet(name);
+  return sheet;
+}
+            `;
+
+            navigator.clipboard.writeText(scriptCode.trim()).then(() => {
+                showToast('Skrip Google Apps Script disalin ke clipboard!');
+            }).catch(() => {
+                showToast('Gagal menyalin skrip.', 'error');
+            });
+        }
+
+        function syncToSheets() {
+            const webhookUrl = localStorage.getItem('sheets_webhook_url');
+            if (!webhookUrl) {
+                showToast('URL Webhook belum diatur.', 'error');
+                openSheetsModal();
+                return;
+            }
+
+            const statusEl = document.getElementById('syncLogStatus');
+            const btn = document.getElementById('btnSyncAction');
+
+            if (statusEl) statusEl.innerText = 'Mengirim data ke Google Spreadsheet...';
+            if (btn) btn.disabled = true;
+
+            const payload = {
+                members: members,
+                payments: payments,
+                attendance: attendanceSessions,
+                athletes: athleteSkills
+            };
+
+            fetch(webhookUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                if (statusEl) statusEl.innerText = 'Data berhasil terkirim ke Google Spreadsheet!';
+                showToast('Data berhasil dikirim ke Google Sheets!');
+            })
+            .catch(err => {
+                if (statusEl) statusEl.innerText = 'Gagal sinkronisasi: ' + err.message;
+                showToast('Gagal terhubung ke Google Sheets.', 'error');
+            })
+            .finally(() => {
+                if (btn) btn.disabled = false;
+            });
+        }
+
+        function directSendToSpreadsheet() {
+            syncToSheets();
+        }
+
+        function promptResetSampleData() {
+            openConfirmModal(
+                'Reset Data Contoh',
+                'Apakah Anda yakin ingin mengembalikan seluruh data ke sampel bawaan awal?',
+                () => {
+                    localStorage.removeItem('elta_members');
+                    localStorage.removeItem('elta_payments');
+                    localStorage.removeItem('elta_attendance');
+                    localStorage.removeItem('elta_athletes');
+
+                    members = DEFAULT_MEMBERS;
+                    payments = [];
+                    attendanceSessions = [];
+                    athleteSkills = DEFAULT_ATHLETE_SKILLS;
+
+                    const currentMonth = new Date().toISOString().slice(0, 7);
+                    generateMonthlyPaymentsIfMissing(currentMonth);
+
+                    renderDashboard();
+                    renderMembersList();
+                    loadAttendanceForDate();
+                    renderPaymentsList();
+                    renderBillingList();
+                    renderAthleteModule();
+
+                    showToast('Data telah dikembalikan ke sampel bawaan.');
+                }
+            );
+        }
+    </script>
+</body>
+</html>
